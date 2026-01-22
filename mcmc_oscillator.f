@@ -1,15 +1,36 @@
 c     =========================================================
-      subroutine heat_bath_step(y, nt, idx, sigma, gamma, alpha,
-     &                          eta)
+c      !subroutine microcanonical_update(y, nt, idx, alpha,)
+
+
+c     =========================================================
+      subroutine get_indexes(idx, nt, il, ir)
+c     =========================================================
+c     Determines the left and right neighbor indices with periodic boundary conditions
+
+      if (idx .eq. 1) then  !! left boundary
+        il = nt
+        ir = 2
+      else if (idx .eq. nt) then  !! right boundary
+        il = nt - 1
+        ir = 1
+      else
+        il = idx - 1
+        ir = idx + 1
+      end if
+
+      end subroutine get_indexes
+
+c     =========================================================
+      subroutine heat_bath_update(y, nt, idx, sigma, alpha, eta)
 c     =========================================================
 c     Performs a heat bath update on the path at index idx
+
       implicit real*8 (a-h,o-z)
-      integer nt, idx
+      integer nt, idx, il, ir
       real*8 y(nt), sigma, gamma, alpha, mu, eta
       
 c     Determine neighboring indices with periodic boundary conditions
-      il = mod(idx - 2, nt) + 1
-      ir = mod(idx, nt) + 1
+      call get_indexes(idx, nt, il, ir)
 
 c     Compute the mean (mu) for the Gaussian distribution
       gamma = (y(il) + y(ir)) / eta
@@ -17,7 +38,7 @@ c     Compute the mean (mu) for the Gaussian distribution
 
       call box_muller(y(idx), mu, sigma)
 
-      end subroutine heat_bath_step
+      end subroutine heat_bath_update
 
 
 c     =========================================================

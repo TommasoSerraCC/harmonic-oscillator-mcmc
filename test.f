@@ -28,12 +28,57 @@ c      idum = -123456789
 
       call test_ran2()
       call test_box_muller()
+      call test_get_indexes()
       call test_heat_bath(sigma, gamma, alpha, eta)
+c      call test_microcanonical()
 
       call ranfinish()
 
       end program test
 
+c     =========================================================
+      subroutine test_get_indexes()
+c     =========================================================
+c     Test the get_indexes subroutine for periodic boundary conditions
+
+      implicit real*8 (a-h,o-z)
+      integer nt, idx, il, ir
+      parameter (nt=4)
+      integer e_il(nt), e_ir(nt)
+      logical all_ok
+
+      write(*,*) 'TEST - Get Indexes with Periodic Boundary Conditions'
+c     Explicit test for nt=4 with hardcoded expected values
+
+      e_il(1) = 4
+      e_ir(1) = 2
+      e_il(2) = 1
+      e_ir(2) = 3
+      e_il(3) = 2
+      e_ir(3) = 4
+      e_il(4) = 3
+      e_ir(4) = 1
+
+      all_ok = .true.
+      do idx = 1, nt
+        call get_indexes(idx, nt, il, ir)
+c        write(*,*) 'Index: ', idx, ' Left: ', il, ' Right: ', ir
+        if (il .ne. e_il(idx) .or. ir .ne. e_ir(idx)) then
+          write(*,*) '  -> MISMATCH for idx=', idx,
+     &      '-- expected (', e_il(idx), ',', e_ir(idx), ')'
+          all_ok = .false.
+        end if
+      end do
+
+        if (all_ok) then
+              write(*,*) 'TEST COMPLETED'
+        else
+              write(*,*) 'TEST FAILED'
+        end if
+
+        write(*,*) ' '
+      return
+      end subroutine test_get_indexes
 
 c     =========================================================
       subroutine test_ran2()
@@ -126,7 +171,7 @@ c     'COLD' Path initialization: y(i) = 0
 
       do j = 1, nsteps
         idx = mod(j-1, nt) + 1
-        call heat_bath_step(y, nt, idx, sigma, gamma, alpha, eta)
+        call heat_bath_update(y, nt, idx, sigma, gamma, alpha, eta)
       end do
 
 c      do i = 1, nt
