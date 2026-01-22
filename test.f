@@ -22,16 +22,17 @@ c      common /dasav/ idum, idum2, iv, iy
       alpha = (eta / 2.d0) + (1.d0 / eta)
       sigma = 1.d0 / sqrt(2.d0 * alpha)
 
+c     Initialize ran2 RNG
       call ranstart()
 
-c      idum = -123456789
-
+c     Run tests
       call test_ran2()
       call test_box_muller()
       call test_get_indexes()
       call test_heat_bath(sigma, gamma, alpha, eta)
-c      call test_microcanonical()
+      call test_microcanonical()
 
+c     Finalize ran2 RNG
       call ranfinish()
 
       end program test
@@ -159,7 +160,7 @@ c     Heat Bath MCMC Simulation test
       parameter (nt=100)
       real*8 y(nt)
 
-      nsteps = 100000
+      nsteps = 1000
 
       write(*,*) 'TEST - Heat Bath MCMC: cold start'
 
@@ -170,8 +171,7 @@ c     'COLD' Path initialization: y(i) = 0
       end do
 
       do j = 1, nsteps
-        idx = mod(j-1, nt) + 1
-        call heat_bath_update(y, nt, idx, sigma, gamma, alpha, eta)
+        call heat_bath_sweep(y, nt, sigma, alpha, eta)
       end do
 
 c      do i = 1, nt
@@ -182,3 +182,35 @@ c      end do
       write(*,*) ' '
       return
       end subroutine test_heat_bath
+
+
+c     =============================================
+      subroutine test_microcanonical()
+c     =============================================
+
+      implicit real*8 (a-h,o-z)
+      parameter (nt=100)
+      integer nsteps, j, i
+      real*8 y(nt), alpha
+      nsteps = 1000
+      write(*,*) 'TEST - Microcanonical MCMC: cold start'
+
+c     'COLD' Path initialization: y(i) = 0
+      write(*,*) 'Initializing path to zero...'
+      do i = 1, nt
+          y(i) = 0.d0
+      end do
+
+      y(1) = 1.d0  !! Introduce a small perturbation to avoid trivial path
+      do j = 1, nsteps
+        call microcanonical_sweep(y, nt, alpha)
+      end do
+
+c      do i = 1, nt
+c          write(*,*) y(i)
+c      end do
+
+      write(*,*) 'TEST COMPLETED'
+      write(*,*) ' '
+      return
+      end subroutine test_microcanonical

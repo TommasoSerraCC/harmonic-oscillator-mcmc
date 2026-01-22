@@ -1,11 +1,78 @@
 c     =========================================================
-c      !subroutine microcanonical_update(y, nt, idx, alpha,)
+      subroutine microcanonical_sweep(y, nt, alpha)
+c     =========================================================
+c     Performs a microcanonical sweep update on the entire path
+c     Each site is updated deterministically to conserve the Euclidean action.
+c     This is done by reflecting the current value about the mean of its neighbors,
+
+      implicit real*8 (a-h,o-z)
+      integer nt, idx, il, ir
+      real*8 y(nt)
+      real*8 gamma, mu, alpha
+
+c     First element at the left boundary
+      gamma = (y(nt) + y(2)) / (2.d0 * alpha)
+      mu = gamma / (2.d0 * alpha)
+      y(1) = 2.d0 * mu - y(1) !! Reflection
+
+c     Middle elements
+      do idx = 2, nt-1
+        gamma = (y(idx-1) + y(idx+1)) / (2.d0 * alpha)
+        mu = gamma / (2.d0 * alpha)
+        y(idx) = 2.d0 * mu - y(idx) !! Reflection
+      end do
+
+c     Last element at the right boundary
+      gamma = (y(nt-1) + y(1)) / (2.d0 * alpha)
+      mu = gamma / (2.d0 * alpha)
+      y(nt) = 2.d0 * mu - y(nt) !! Reflection
+
+      return
+      end subroutine microcanonical_sweep
+
+c     =========================================================
+      subroutine heat_bath_sweep(y, nt, sigma, alpha, eta)
+c     =========================================================
+c     Performs a Heat Bath sweep update on the entire path.
+c     Each site is updated by sampling from its full conditional probability,
+c     fixing all other degrees of freedom. This distribution is derived from 
+c     the local Euclidean action and is a Gaussian with mean and variance 
+c     determined by neighboring sites, independent of the current site value.
+
+      implicit real*8 (a-h,o-z)
+      integer nt, idx, il, ir
+      real*8 y(nt), sigma, gamma, alpha, mu, eta
+      
+c     First element at the left boundary
+      gamma = (y(nt) + y(2)) / eta
+      mu = gamma / (2.d0 * alpha)
+      call box_muller(y(1), mu, sigma) !! Sample from Gaussian
+
+c     Middle elements
+      do idx = 2, nt-1
+        gamma = (y(idx-1) + y(idx+1)) / eta
+        mu = gamma / (2.d0 * alpha)
+        call box_muller(y(idx), mu, sigma)
+      end do
+
+c     Last element at the right boundary
+      gamma = (y(nt-1) + y(1)) / eta
+      mu = gamma / (2.d0 * alpha)
+      call box_muller(y(nt), mu, sigma)
+
+      end subroutine heat_bath_sweep
+
+
+
 
 
 c     =========================================================
       subroutine get_indexes(idx, nt, il, ir)
 c     =========================================================
 c     Determines the left and right neighbor indices with periodic boundary conditions
+
+      implicit none
+      integer idx, nt, il, ir
 
       if (idx .eq. 1) then  !! left boundary
         il = nt
@@ -19,26 +86,6 @@ c     Determines the left and right neighbor indices with periodic boundary cond
       end if
 
       end subroutine get_indexes
-
-c     =========================================================
-      subroutine heat_bath_update(y, nt, idx, sigma, alpha, eta)
-c     =========================================================
-c     Performs a heat bath update on the path at index idx
-
-      implicit real*8 (a-h,o-z)
-      integer nt, idx, il, ir
-      real*8 y(nt), sigma, gamma, alpha, mu, eta
-      
-c     Determine neighboring indices with periodic boundary conditions
-      call get_indexes(idx, nt, il, ir)
-
-c     Compute the mean (mu) for the Gaussian distribution
-      gamma = (y(il) + y(ir)) / eta
-      mu = gamma / (2.d0 * alpha)
-
-      call box_muller(y(idx), mu, sigma)
-
-      end subroutine heat_bath_update
 
 
 c     =========================================================
