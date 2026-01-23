@@ -1,51 +1,51 @@
+c     ESTIMATES FOR THE COMMON OBSERVABLES OF THE HARMONIC OSCILLATOR  
+
 c     =============================================
-      subroutine pos_mean(y, nt, mean)
+      subroutine path_y(y, nt, mean)
 c     =============================================
-c     Compute the mean of the path positions
+c     Compute the position mean over the path
 
       implicit none
-      integer nt
+      integer nt, i
       real*8 y(nt), mean
 
       mean = 0.d0
-
       do i = 1, nt
         mean = mean + y(i)
       end do
-
       mean = mean / dble(nt)
 
-      end subroutine pos_mean
+      end subroutine path_y
 
 
 c     =============================================
-      subroutine pos_variance(y, nt, mean, variance)
+      subroutine path_y2(y, nt, mean, variance)
 c     =============================================
+c     Compute the position variance over the path
 
       implicit none
       integer nt, i
       real*8 y(nt), mean, variance
 
       variance = 0.d0
-
       do i = 1, nt
         variance = variance + (y(i) - mean)**2
       end do
-
       variance = variance / dble(nt - 1.d0)
     
-      end subroutine pos_variance
+      end subroutine path_y2
 
 
 c     =============================================
-      subroutine ene(y, nt, eta, energy)
+      subroutine path_ene(y, nt, eta, energy)
 c     =============================================
+c     Compute the energy over the path
 
       implicit none
       integer nt, i
       real*8 y(nt), eta, energy, kin, pot
 
-      gr_ene = 1.d0 / (2.d0 * eta) !! Ground state energy
+      energy = 1.d0 / (2.d0 * eta) !! offset
 
 c     Explicitly compute kinetic and potential energy
 c     for the first point to handle periodic BC
@@ -61,7 +61,9 @@ c     Sum over the rest of the path
       kin = kin / (2.d0 * nt * eta**2)
       pot = pot / (2.d0 * nt)
 
-      energy = gr_ene + kin + pot
+      energy = energy + kin + pot
 
-      end subroutine ene
+      end subroutine path_ene
+
+
 
