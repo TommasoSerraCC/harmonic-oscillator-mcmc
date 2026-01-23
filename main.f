@@ -8,7 +8,7 @@
       parameter (pi = 3.141592653589793d0)
       integer nt_vals(n_nt)                ! number of time slices
       integer nsteps, nt, therm_steps
-      integer istart  !! initial configuration flag: 0=cold, 1=hot
+      integer istart, ground  !! initial configuration flags
       integer j, idx, i, k
       integer idum, idum2, iv(32), iy
       real*8 y(nt_max)            ! array of the discretized path
@@ -19,7 +19,10 @@
       real*8 average_y(n_nt), average_y2(n_nt), average_e(n_nt)
 
 c     Namelist
-      namelist /params/istart
+      namelist /params/istart, ground
+
+      istart = 0  ! cold start by default
+      ground = 0  ! ground state simulation flag
 
 c     Read input parameters
       read(5, params)
@@ -30,6 +33,10 @@ c     Read input parameters
       
 c     Initialize ran2 RNG
       call ranstart()
+
+      if (ground .eq. 1) then
+        call ground_state()
+      end if
 
       do j = 1, n_nt
         nt = nt_vals(j)
@@ -87,6 +94,8 @@ c     Save results to file
       end do
 c     Close file
       close(10)
+
+      call ranfinish()
 
       end program oscillator
 
