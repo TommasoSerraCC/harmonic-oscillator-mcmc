@@ -7,9 +7,7 @@
       parameter (n_conf=30000)   ! number of path configurations to save
       
       integer therm_steps
-      integer istart  ! initial configuration flag: 0=cold, 1=hot
       integer i, k, conf_idx, step_interval
-      integer idum, idum2, iv(32), iy
       real*8 y(nt)                    ! array of the discretized path
       real*8 path_matrix(n_conf, nt) ! matrix to store path configurations
       real*8 eta                      ! adimensional parameter: eta = a*omega
@@ -25,7 +23,7 @@
       write(*,*) 'n_conf =', n_conf
       write(*,*) 'step_interval =', step_interval
 
-      ! Set parameters
+c     Set parameters
       eta = bhw / dble(nt)
       alpha = (eta / 2.d0) + (1.d0 / eta)
       sigma = 1.d0 / sqrt(2.d0 * alpha)
