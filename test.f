@@ -29,8 +29,9 @@ c     Run tests
       call test_ran2()
       call test_box_muller()
       call test_get_indexes()
-      call test_heat_bath(sigma, gamma, alpha, eta)
-      call test_microcanonical()
+      call test_heat_bath(sigma, alpha, eta)
+      call test_microcanonical(alpha)
+      call test_total_update()
 
 c     Finalize ran2 RNG
       call ranfinish()
@@ -153,7 +154,7 @@ c     Box-Muller Gaussian random number generator test
       end subroutine test_box_muller
 
 
-      subroutine test_heat_bath(sigma, gamma, alpha, eta)
+      subroutine test_heat_bath(sigma, alpha, eta)
 c     Heat Bath MCMC Simulation test
 
       implicit real*8 (a-h,o-z)
@@ -185,7 +186,7 @@ c      end do
 
 
 c     =============================================
-      subroutine test_microcanonical()
+      subroutine test_microcanonical(alpha)
 c     =============================================
 
       implicit real*8 (a-h,o-z)
@@ -214,3 +215,33 @@ c      end do
       write(*,*) ' '
       return
       end subroutine test_microcanonical
+
+
+      subroutine test_total_update()
+c     Total Update MCMC Simulation test
+
+      implicit real*8 (a-h,o-z)
+      parameter (nt=100)
+      integer nsteps, j, i
+      real*8 y(nt), sigma, alpha, eta
+      nsteps = 1000
+      write(*,*) 'TEST - Total Update MCMC: cold start'
+c     'COLD' Path initialization: y(i) = 0
+      write(*,*) 'Initializing path to zero...'
+      do i = 1, nt
+          y(i) = 0.d0
+      end do
+
+      eta = 0.5d0               ! set eta value
+      alpha = (eta / 2.d0) + (1.d0 / eta)
+      sigma = 1.d0 / sqrt(2.d0 * alpha)
+
+      do j = 1, nsteps
+        call total_update(y, nt, sigma, alpha, eta)
+      end do
+
+      do i = 1, nt
+          write(*,*) y(i)
+      end do
+
+      end subroutine test_total_update

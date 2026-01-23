@@ -63,8 +63,25 @@ c     Last element at the right boundary
       end subroutine heat_bath_sweep
 
 
+c     ========================================================
+      subroutine total_update(y, nt, sigma, alpha, eta)
+c     ========================================================
+c     Performs a combined update on the path: first a Heat Bath sweep,
+c     followed by 5 Microcanonical sweeps.
 
+      implicit real*8 (a-h,o-z)
+      integer nt
+      real*8 y(nt), sigma, alpha, eta
+      integer i
 
+      call heat_bath_sweep(y, nt, sigma, alpha, eta)
+      do i = 1, 5
+        call microcanonical_sweep(y, nt, alpha)
+      end do
+
+      return
+      end subroutine total_update
+      
 
 c     =========================================================
       subroutine get_indexes(idx, nt, il, ir)
