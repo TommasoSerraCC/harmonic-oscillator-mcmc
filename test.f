@@ -186,13 +186,13 @@ c      end do
 
 
 c     =============================================
-      subroutine test_microcanonical(alpha)
+      subroutine test_microcanonical(alpha, eta)
 c     =============================================
 
       implicit real*8 (a-h,o-z)
       parameter (nt=100)
       integer nsteps, j, i
-      real*8 y(nt), alpha
+      real*8 y(nt), alpha, eta
       nsteps = 1000
       write(*,*) 'TEST - Microcanonical MCMC: cold start'
 
@@ -204,7 +204,7 @@ c     'COLD' Path initialization: y(i) = 0
 
       y(1) = 1.d0  !! Introduce a small perturbation to avoid trivial path
       do j = 1, nsteps
-        call microcanonical_sweep(y, nt, alpha)
+        call microcanonical_sweep(y, nt, alpha, eta)
       end do
 
 c      do i = 1, nt

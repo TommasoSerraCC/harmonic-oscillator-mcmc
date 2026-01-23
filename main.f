@@ -2,7 +2,7 @@
 
       implicit real*8 (a-h,o-z)
       parameter (bhw=5.d0)  ! beta*h_bar*omega
-      parameter (n_nt=3)   ! number of different nt values
+      parameter (n_nt=10)   ! number of different nt values
       parameter (nt_max=10000)  ! maximum number of time slices
       parameter (nsteps_max=1000000) ! maximum number of MCMC steps
       parameter (pi = 3.141592653589793d0)
@@ -26,7 +26,7 @@ c     Read input parameters
       
       nsteps = 100000   ! set number of MCMC steps
       therm_steps = 10000  ! set number of thermalization steps
-      nt_vals = (/5, 10, 20/) ! set different nt values
+      nt_vals = (/5, 10, 15, 20, 25, 30, 35, 40, 45, 50/) ! set different nt values
       
 c     Initialize ran2 RNG
       call ranstart()

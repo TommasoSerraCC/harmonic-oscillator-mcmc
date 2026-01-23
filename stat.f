@@ -19,19 +19,19 @@ c     Compute the position mean over the path
 
 
 c     =============================================
-      subroutine path_y2(y, nt, mean, variance)
+      subroutine path_y2(y, nt, mean, y2mean)
 c     =============================================
-c     Compute the position variance over the path
+c     Compute the mean of y^2 over the path
 
       implicit none
       integer nt, i
-      real*8 y(nt), mean, variance
+      real*8 y(nt), mean, y2mean
 
-      variance = 0.d0
+      y2mean = 0.d0
       do i = 1, nt
-        variance = variance + (y(i) - mean)**2
+        y2mean = y2mean + y(i)**2
       end do
-      variance = variance / dble(nt - 1.d0)
+      y2mean = y2mean / dble(nt)
     
       end subroutine path_y2
 
@@ -61,7 +61,7 @@ c     Sum over the rest of the path
       kin = kin / (2.d0 * nt * eta**2)
       pot = pot / (2.d0 * nt)
 
-      energy = energy + kin + pot
+      energy = energy - kin + pot
 
       end subroutine path_ene
 

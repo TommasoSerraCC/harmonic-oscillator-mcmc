@@ -1,5 +1,5 @@
 c     =========================================================
-      subroutine microcanonical_sweep(y, nt, alpha)
+      subroutine microcanonical_sweep(y, nt, alpha, eta)
 c     =========================================================
 c     Performs a microcanonical sweep update on the entire path
 c     Each site is updated deterministically to conserve the Euclidean action.
@@ -11,19 +11,19 @@ c     This is done by reflecting the current value about the mean of its neighbo
       real*8 gamma, mu, alpha
 
 c     First element at the left boundary
-      gamma = (y(nt) + y(2)) / (2.d0 * alpha)
+      gamma = (y(nt) + y(2)) / eta
       mu = gamma / (2.d0 * alpha)
       y(1) = 2.d0 * mu - y(1) !! Reflection
 
 c     Middle elements
       do idx = 2, nt-1
-        gamma = (y(idx-1) + y(idx+1)) / (2.d0 * alpha)
+        gamma = (y(idx-1) + y(idx+1)) / eta
         mu = gamma / (2.d0 * alpha)
         y(idx) = 2.d0 * mu - y(idx) !! Reflection
       end do
 
 c     Last element at the right boundary
-      gamma = (y(nt-1) + y(1)) / (2.d0 * alpha)
+      gamma = (y(nt-1) + y(1)) / eta
       mu = gamma / (2.d0 * alpha)
       y(nt) = 2.d0 * mu - y(nt) !! Reflection
 
@@ -77,7 +77,7 @@ c     first a Heat Bath sweep, followed by 5 Microcanonical sweeps.
       do j = 1, 10
         call heat_bath_sweep(y, nt, sigma, alpha, eta)
         do i = 1, 5
-          call microcanonical_sweep(y, nt, alpha)
+          call microcanonical_sweep(y, nt, alpha, eta)
         end do
       end do
 
