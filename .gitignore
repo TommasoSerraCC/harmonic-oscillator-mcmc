@@ -3,11 +3,9 @@
 
 *.pdf
 
-*.png
-
 .venv/
 
-notes.txt
+utils/notes.txt
 
 randomseed
 

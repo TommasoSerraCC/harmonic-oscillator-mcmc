@@ -96,29 +96,6 @@ c         of the connected correlators
           
         end do
 
-        k = 1000  ! block size for jackknife analysis
-        valid_n = (nsteps/k) * k
-
-        call jackknife(ycm, ym, valid_n, k, connected_corr,
-     &          mean_jack, st_err)
-        write(*,*) 'Connected <y(0)y(nc)> - <y>^2 = ', mean_jack,
-     &     ' +/- ', st_err
-
-        call jackknife(y2cm, y2m, valid_n, k, connected_corr,
-     &          mean_jack, st_err)
-        write(*,*) 'Connected <y^2(0)y^2(nc)> - <y^2>^2 = ', mean_jack,
-     &     ' +/- ', st_err
-
-        call jackknife(y3cm, y3m, valid_n, k, connected_corr,
-     &          mean_jack, st_err)
-        write(*,*) 'Connected <y^3(0)y^3(nc)> - <y^3>^2 = ', mean_jack,
-     &     ' +/- ', st_err
-
-        call jackknife(Acm, Am, valid_n, k, connected_corr,
-     &          mean_jack, st_err)
-        write(*,*) 'Connected <A(0)A(nc)> - <A>^2 = ', mean_jack,
-     &     ' +/- ', st_err
-
         ay = 0.d0
         ay2 = 0.d0
         ay3 = 0.d0
