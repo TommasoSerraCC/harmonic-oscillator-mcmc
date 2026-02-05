@@ -5,6 +5,8 @@
 
 *.png
 
+.venv/
+
 notes.txt
 
 randomseed
