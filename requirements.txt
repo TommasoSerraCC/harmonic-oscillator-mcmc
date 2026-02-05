@@ -1,0 +1,4 @@
+# Python dependencies for Harmonic Oscillator analysis
+numpy>=1.20.0
+matplotlib>=3.4.0
+scipy>=1.7.0
