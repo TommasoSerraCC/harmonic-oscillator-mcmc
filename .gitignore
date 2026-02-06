@@ -3,6 +3,10 @@
 
 *.pdf
 
+*.png
+
+*.dat
+
 .venv/
 
 utils/notes.txt
