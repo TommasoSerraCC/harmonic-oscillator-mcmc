@@ -5,79 +5,98 @@ import os
 import re
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--skip', type=int, nargs='+', required=True,
-                    help='thermalization skip values to use (one per nt, or one for all)')
-parser.add_argument('--nt', type=int, nargs='+', default=None,
-                    help='specific nt values (default: auto-detect from results/)')
+parser.add_argument('--skip', type=int, default=None,
+                    help='thermalization skip value (default: auto-detect all)')
+parser.add_argument('-oy', action='store_true', help='plot <y> vs eta')
+parser.add_argument('-o2', action='store_true', help='plot <y^2> vs eta')
+parser.add_argument('-o3', action='store_true', help='plot <y^3> vs eta')
+parser.add_argument('-oA', action='store_true', help='plot <A> vs eta')
+parser.add_argument('-oE', action='store_true', help='plot <E> vs eta')
+parser.add_argument('--save', action='store_true', help='save plots to file')
 args = parser.parse_args()
 
-# Find available nt directories
+# If no plot flag is given, show all
+show_flags = [args.oy, args.o2, args.o3, args.oA, args.oE]
+if not any(show_flags):
+    show_flags = [True, True, True, True, True]
+
+# Scan results directory
 all_dirs = os.listdir('results') if os.path.isdir('results') else []
 
-if args.nt:
-    nt_vals = sorted(args.nt)
-else:
-    nt_vals = []
-    for d in all_dirs:
-        m = re.match(r'nt(\d+)_therm(\d+)', d)
-        if m:
-            nt_vals.append(int(m.group(1)))
-    nt_vals = sorted(set(nt_vals))
+# Collect (nt, skip) pairs
+data_map = {}  # skip -> list of (nt, filepath)
+for d in all_dirs:
+    m = re.match(r'nt(\d+)_therm(\d+)', d)
+    if m:
+        ntv = int(m.group(1))
+        sk = int(m.group(2))
+        fpath = f'results/{d}/observables.dat'
+        if os.path.isfile(fpath):
+            if sk not in data_map:
+                data_map[sk] = []
+            data_map[sk].append((ntv, fpath))
 
-# Expand skip list
-if len(args.skip) == 1:
-    skip_vals = [args.skip[0]] * len(nt_vals)
-else:
-    skip_vals = args.skip
+# Filter by skip if specified
+if args.skip is not None:
+    if args.skip in data_map:
+        data_map = {args.skip: data_map[args.skip]}
+    else:
+        print(f"No data found for skip={args.skip}")
+        exit(1)
 
-print(f"nt values: {nt_vals}")
-print(f"skip values: {skip_vals}")
+if not data_map:
+    print("No data found in results/")
+    exit(1)
+
+print(f"Found {len(data_map)} skip value(s): {sorted(data_map.keys())}")
 
 obs_names = ['y', 'y2', 'y3', 'A', 'E']
-
-# Collect data
-nt_arr = []
-means = {n: [] for n in obs_names}
-errs = {n: [] for n in obs_names}
-
-for ntv, sk in zip(nt_vals, skip_vals):
-    fpath = f'results/nt{ntv}_therm{sk}/observables.dat'
-    if not os.path.isfile(fpath):
-        print(f"  missing: {fpath}")
-        continue
-    with open(fpath) as f:
-        for line in f:
-            if line.startswith('#'):
-                continue
-            parts = line.split()
-            name = parts[0]
-            if name in obs_names:
-                means[name].append(float(parts[1]))
-                errs[name].append(float(parts[2]))
-    nt_arr.append(ntv)
-
-nt_arr = np.array(nt_arr)
-eta_arr = 10.0 / nt_arr
-
-# Plot 5 observables vs eta (or nt)
-fig, axes = plt.subplots(3, 2, figsize=(11, 10))
-axes = axes.flatten()
-
-for i, name in enumerate(obs_names):
-    ax = axes[i]
-    m = np.array(means[name])
-    e = np.array(errs[name])
-    ax.errorbar(eta_arr, m, yerr=e, fmt='o-', ms=4, capsize=3, lw=0.8)
-    ax.set_xlabel(r'$\eta = \beta\hbar\omega / N_t$')
-    ax.set_ylabel(f'$\\langle {name} \\rangle$')
-    ax.set_title(f'<{name}> vs $\\eta$')
-    ax.grid(True, alpha=0.3)
-
-axes[5].axis('off')
-fig.suptitle(r'Observables vs $\eta$ ($\beta\hbar\omega=10$)')
-fig.tight_layout()
-
+obs_mean_labels = [r'$\langle y \rangle$', r'$\langle y^2 \rangle$',
+                   r'$\langle y^3 \rangle$', r'$\langle A \rangle$',
+                   r'$\langle E \rangle$']
 os.makedirs('plots', exist_ok=True)
-fig.savefig('plots/observables_vs_eta.png', dpi=150)
+
+# Process each skip value separately
+for skip_val in sorted(data_map.keys()):
+    entries = sorted(data_map[skip_val])
+    nt_arr = []
+    means = {n: [] for n in obs_names}
+    errs = {n: [] for n in obs_names}
+    
+    print(f"\nProcessing skip={skip_val}:")
+    for ntv, fpath in entries:
+        print(f"  nt={ntv}")
+        with open(fpath) as f:
+            for line in f:
+                if line.startswith('#'):
+                    continue
+                parts = line.split()
+                name = parts[0]
+                if name in obs_names:
+                    means[name].append(float(parts[1]))
+                    errs[name].append(float(parts[2]))
+        nt_arr.append(ntv)
+    
+    nt_arr = np.array(nt_arr)
+    eta_arr = 10.0 / nt_arr
+    
+    # Plot each observable separately
+    for i, (name, meanlabel, do_plot) in enumerate(
+            zip(obs_names, obs_mean_labels, show_flags)):
+        if not do_plot:
+            continue
+        m = np.array(means[name])
+        e = np.array(errs[name])
+        fig, ax = plt.subplots(figsize=(7, 5))
+        ax.errorbar(eta_arr, m, yerr=e, fmt='o', ms=4, capsize=3, elinewidth=1.2)
+        ax.set_xlabel(r'$\eta = \beta\hbar\omega / N_t$')
+        ax.set_ylabel(meanlabel)
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+        if args.save:
+            outfile = f'plots/{name}_vs_eta_therm{skip_val}.png'
+            fig.savefig(outfile, dpi=150)
+            print(f"  Saved {outfile}")
+
 plt.show()
-print("Saved plots/observables_vs_eta.png")
+print("\nDone.")
