@@ -1,10 +1,10 @@
-      program main_data_collection
+      program preliminary_run
 
       implicit real*8 (a-h,o-z)
-      parameter (bhw=10.d0)  ! beta*h_bar*omega
-      parameter (n_nt=11)   ! number of different nt values
+      parameter (bhw=5.d0)  ! beta*h_bar*omega
+      parameter (n_nt=3)   ! number of different nt values
       parameter (nt_max=200)  ! maximum number of time slices
-      parameter (nsteps=1000000) ! number of MCMC steps (10^6)
+      parameter (nsteps=100000) ! number of MCMC steps (10^5)
       parameter (ncorr_max=100) ! maximum nt/2 = 200/2 = 100
       integer ncorr
       common /corr_params/ ncorr
@@ -22,18 +22,10 @@
       real*8 eta                  ! adimensional_parameter : eta = a*omega
       character*100 filename
 
-c     Set nt values: 4, 12, 24, 30, 36, 42, 50, 75, 100, 150, 200
-      nt_vals(1) = 4
-      nt_vals(2) = 12
-      nt_vals(3) = 24
-      nt_vals(4) = 30
-      nt_vals(5) = 36
-      nt_vals(6) = 42
-      nt_vals(7) = 50
-      nt_vals(8) = 75
-      nt_vals(9) = 100
-      nt_vals(10) = 150
-      nt_vals(11) = 200
+c     Set nt values
+      nt_vals(1) = 50
+      nt_vals(2) = 100
+      nt_vals(3) = 200
 
       istart = 0  ! cold start
 
@@ -47,7 +39,6 @@ c     Loop over different nt values
 
         write(*,*) 'Running simulation with nt = ', nt
         write(*,*) 'Number of correlator points: ', ncorr_points
-        write(*,*) 'Number of MCMC steps: ', nsteps
 
         eta = bhw / dble(nt)   ! set eta value
         alpha = (eta / 2.d0) + (1.d0 / eta)
@@ -58,7 +49,7 @@ c       Initialize path (cold start)
 
 c       Open output file for this nt value
         write(filename, '(A,I0,A)') 
-     &    'data/raw_data_nt', nt, '.dat'
+     &    'preliminary_data/raw_data_nt', nt, '.dat'
         open(unit=10, file=filename, status='unknown')
 
 c       Main MCMC loop
@@ -93,8 +84,8 @@ c         Write all data to file: y, y2, y3, A, E, then correlators
      &      ycm(ncorr_points), y2cm(ncorr_points),
      &      y3cm(ncorr_points), Acm(ncorr_points)
 
-c         Progress indicator every 100000 steps
-          if (mod(i, 100000) .eq. 0) then
+c         Progress indicator every 10000 steps
+          if (mod(i, 10000) .eq. 0) then
             write(*,*) '  Step: ', i, ' / ', nsteps
           end if
 
@@ -111,7 +102,7 @@ c         Progress indicator every 100000 steps
 
       write(*,*) 'All simulations completed.'
 
-      end program main_data_collection
+      end program preliminary_run
 
 
 c     ============================
@@ -129,24 +120,3 @@ c     Initialize path to zero
       end do
       
       end subroutine cold_start
-
-
-c     ===========================
-      subroutine hot_start(y, nt)
-c     ===========================
-c     Initialize path with random values between -1 and 1
-
-      implicit none
-      integer nt
-      real*8 y(nt), ran2
-      integer i
-
-      do i = 1, nt
-        y(i) = 2.d0 * ran2() - 1.d0
-      end do
-        
-      end subroutine hot_start
-
-
-
-
