@@ -1,0 +1,130 @@
+\documentclass[12pt,a4paper]{article}
+
+% Pacchetti per la lingua e i font
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage[T1]{fontenc}
+
+% Pacchetti matematici fondamentali
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+% Pacchetto per la notazione fisica (Bra-Ket)
+\usepackage{physics} 
+
+% Per margini più simili all'immagine
+\usepackage[margin=1in]{geometry}
+
+\title{\textbf{Studio dell'oscillatore armonico quantistico nel formalismo del path integral tramite MCMC}}
+\author{Tommaso Serra}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduzione}
+In questa relazione viene presentato un semplice studio dell'oscillatore armonico 
+quantistico tramite simulazioni Monte Carlo a catena di Markov (MCMC), 
+sfruttando la formulazione con l'integrale sui cammini. Viene ricostruita la 
+distribuzione di probabilità dello stato fondamentale, vengono stimate le medie 
+termiche di alcune osservabili fisiche rilevanti e i primi gap energetici facendo 
+uso di opportuni operatori interpolanti e dei loro correlatori connessi.
+
+\subsection{Richiami oscillatore armonico}
+L'Hamiltoniana dell'oscillatore armonico è data da:
+\begin{equation}
+    H = \hat{T} + \hat{V} = -\frac{\hbar^2}{2m} \frac{d^2}{dx^2} + \frac{1}{2}m\omega^2x^2
+\end{equation}
+i cui autostati in rappresentazione della posizione sono:
+\begin{equation}
+    \psi_n(x) = \frac{1}{\sqrt{2^n n!}} \left( \frac{m\omega}{\pi\hbar} \right)^{1/4} e^{-\frac{m\omega x^2}{2\hbar}} H_n\left( \sqrt{\frac{m\omega}{\hbar}} x \right)
+\end{equation}
+dove $H_n$ sono i polinomi di Hermite. I rispettivi autovalori dell'energia sono:
+\begin{equation}
+    E_n = \hbar\omega \left( n + \frac{1}{2} \right)
+\end{equation}
+
+\subsection{Richiami di statistica quantistica e path integral Euclideo}
+La funzione di partizione di un sistema quantistico si calcola come:
+\begin{equation}
+    Z = \text{Tr}(e^{-\beta H})
+\end{equation}
+Possiamo esprimere la traccia nella base delle posizioni, ottenendo:
+\begin{equation}
+    Z = \int dx \bra{x} e^{-\beta H} \ket{x}
+\end{equation}
+Possiamo applicare la procedura del path integral analogamente al caso della propagazione in tempo reale
+sfruttando la sostituzione $t \to -i\tau = -i\beta$ passando al tempo immaginario tramite la rotazione di WIck
+(l'unica differenza risiede nella necessità di fissare le condizioni al contorno periodiche).
+la funzione di partizione in questa formulazione al limite del continuo diventa ($\hbar=1$):
+\begin{equation}
+    Z \propto \int_{x(0)=x(\beta)} \mathcal{D}x(\tau) e^{-S_E[x(\tau)]}
+\end{equation}
+dove $S_E$ è l'azione Euclidea data da:
+\begin{equation}
+    S_E[x(\tau)] = \int_0^\beta d\tau' \left[ \frac{1}{2} m \left( \frac{dx}{d\tau'} \right)^2 + V(x(\tau')) \right]
+\end{equation}
+A questo punto introduciamo la media termodinamica di un operatore $O$:
+\begin{equation}
+    \langle O \rangle = \sum_{n} P_{n} O_{n}
+\end{equation}
+Dove:
+
+\begin{equation*}
+    P_{n} = \frac{e^{-\beta E_n}}{Z} \quad\quad\quad O_{n} = \bra{n} O \ket{n}
+\end{equation*}
+Quindi:
+\begin{equation}
+    \langle O \rangle = \frac{\text{Tr}(O e^{-\beta H})}{Z}
+\end{equation}
+Applicando la procedura del path integral anche al numeratore in modo simile, otteniamo:
+\begin{equation}
+    \langle O \rangle = \frac{\int \mathcal{D}x(\tau) e^{-S_E[x(\tau)]} O[x(\tau)]}{\int \mathcal{D}x(\tau) e^{-S_E[x(\tau)]}}
+\end{equation}
+Risulta evidente come le medie termiche si ottengano come media su tutti i cammini periodici
+pesati con l'esponenziale dell'azione Euclidea. Possiamo stimare questi valori progettando
+una catena di Markov che campioni opportunamente lo spazio dei cammini, che sarà ovviamente discretizzato
+(provvederemo a analizzare il limite del continuo aumentando il numero di suddivisioni temporali).
+
+\section{Catena di Markov}
+L'azione Euclidea discreta per un cammino $x_i$ con $i=0,1,...,N-1$ è data da:
+\begin{equation}
+    S_E[x_i]^{L} = a \sum_{i=0}^{N_t-1} \left[ \frac{m\omega^2 x_i^2}{2} + \frac{m}{2} \left(\frac{x_{i+1}-x_i}{a}\right)^2 \right]
+\end{equation}
+Conviene passare a unità adimensionali ponendo:
+\begin{equation}:
+    \eta = a \omega \quad\quad\quad y_i = \frac{x_i}{l} \quad\quad\quad l = \sqrt{\frac{1}{m\omega}}
+\end{equation}
+dove $\frac{1}{\omega}$ è il tempo scala del sistema. Quindi l'azione diventa:
+\begin{equation}
+    S_E^{L} = \sum_{i=0}^{N_t-1} \left[ y_i^2 \left( \frac{\eta}{2} + \frac{1}{\eta}\right) - \frac{1}{\eta} y_i y_{i+1}\right]
+\end{equation}
+La distribuzione di probabilità da campionare è quindi:
+\begin{equation}
+    P(y_0,\dots,y_{N_t-1}) = \frac{\exp\left\{ - \sum_{i=0}^{N_t-1} \left[y_i^2 \left(\frac{\eta}{2} + \frac{1}{\eta}\right) - \frac{1}{\eta} y_i y_{i+1}\right]\right\}}{\int \prod_{j=0}^{N_t-1} dy_j \exp\left\{ - \sum_{i=0}^{N_t-1} \left[y_i^2 \left(\frac{\eta}{2} + \frac{1}{\eta}\right) - \frac{1}{\eta} y_i y_{i+1}\right]\right\}}
+\end{equation}
+E' stata implementata una catena composta da 1 sweep di heat-bath e 5 sweep di over-relaxation (update microcanonico),
+che garantiscono aperiodicità e irriducibilità.
+
+\subsection{Heat-bath update}
+L'algoritmo heat-bath locale determina il nuovo valore $y_i^{t}$ del cammino in modo indipendente dal valore $y_i$ allo step precedente, campionando direttamente dalla distribuzione condizionata $P(y_i | y_{j \neq i})$ che è una gaussiana centrata in:
+\begin{equation}
+    \mu_i = \frac{\gamma}{2\alpha} \quad\quad\quad \gamma = \frac{y_{i-1} + y_{i+1}}{\eta} \quad\quad\quad \alpha = \frac{\eta}{2} + \frac{1}{\eta}
+\end{equation}
+che dipende dai soli valori dei punti adiacenti $y_{i-1}$ e $y_{i+1}$.
+La varianza è:
+\begin{equation}
+    \sigma^2 = \frac{1}{2\alpha}
+\end{equation}
+L'accettanza per il nuovo stato è pari a 1. Per campionare la suddetta gaussiana, si è utilizzato l'algoritmo Box-Muller.
+
+\subsection{Microcanonical update}
+L'update microcanonico (over-relaxation) è un aggiornamento deterministico che preserva l'azione Euclidea, e quindi la probabilità di accettazione è sempre 1. Il nuovo valore $y_i^{t}$ viene calcolato come:
+\begin{equation}
+    y_i^{t} = 2\mu - y_i
+\end{equation}
+Dove $\mu_i$ è la media condizionata definita in precedenza. Ovvero stiamo riflettendo il punto $y_i$ rispetto alla media della Gaussiana. Questo tipo di aggiornamento è particolarmente efficace per ridurre le autocorrelazioni nei campioni
+ed è computazionalmente economico.
+
+\end{document}

@@ -247,16 +247,15 @@ def autocorr(x, max_lag):
     n = len(x)
     xm = x - x.mean()
     var = np.dot(xm, xm)
-    acf = np.array([np.dot(xm[:n-t], xm[t:]) / var for t in range(max_lag)])
+    acf = np.array([np.dot(xm[:n-t], xm[t:]) / var * n / (n - t) for t in range(max_lag)])
     return acf
 
-max_lag = 500
+max_lag = 50
 tau_ints = np.zeros(5)
-rhos = []
-for i, d in enumerate(obs_arrays):
-    rho = autocorr(d, max_lag)
-    rhos.append(rho)
-    tau_ints[i] = rho[1:max_lag//2].sum()
+C_obs = {}  # Autocorrelation functions: C_obs[name] = C_F(k)
+for i, (name, d) in enumerate(zip(obs_names, obs_arrays)):
+    C_obs[name] = autocorr(d, max_lag)
+    tau_ints[i] = C_obs[name][1:].sum()
 
 # Save tau_int
 tau_out = np.column_stack([obs_names, tau_ints])
@@ -269,22 +268,22 @@ with open(f'{outdir}/tau_int.dat', 'w') as f:
 def exp_decay(t, A, tau):
     return A * np.exp(-t / tau)
 
-rho_y2 = rhos[1]
-idx_zero = max(np.argmax(rho_y2[1:] < 0.01) + 1, 10)
+C_y2 = C_obs['y2']
+idx_zero = max(np.argmax(C_y2[1:] < 0.01) + 1, 10)
 t_fit = np.arange(1, idx_zero)
 try:
-    popt, _ = curve_fit(exp_decay, t_fit, rho_y2[1:idx_zero], p0=[1, 5], bounds=([0, 0.1], [np.inf, 100]))
+    popt, _ = curve_fit(exp_decay, t_fit, C_y2[1:idx_zero], p0=[1, 5], bounds=([0, 0.1], [np.inf, 100]))
     A_exp, tau_exp = popt
 except:
     A_exp, tau_exp = 1.0, tau_ints[1]
 
-print(f"  tau_exp (fit y2) = {tau_exp:.2f}")
+print(f"  tau_exp (fit y$^2$) = {tau_exp:.2f}")
 
-# Save tau_exp fit data: lag, rho_y2 (first 50 points), and fit params
+# Save tau_exp fit data: lag, C_{y^2} (first 50 points), and fit params
 lag_save = np.arange(51)
-rho_save = rho_y2[:51]
-np.savetxt(f'{outdir}/tau_exp_fit.dat', np.column_stack([lag_save, rho_save]),
-           header=f"lag  rho_y2\n# fit_params: A={A_exp:.8e}  tau={tau_exp:.8e}", fmt='%16.8e')
+C_y2_save = C_y2[:51]
+np.savetxt(f'{outdir}/tau_exp_fit.dat', np.column_stack([lag_save, C_y2_save]),
+           header=f"lag  C_{{y^2}}\n# fit_params: A={A_exp:.8e}  tau={tau_exp:.8e}", fmt='%16.8e')
 
 # ========== Save observable means + blocking errors ==========
 # Use the blocking plateau value: take the sigma at a reasonable block size

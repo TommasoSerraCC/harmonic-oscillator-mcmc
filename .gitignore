@@ -3,6 +3,14 @@
 
 *.pdf
 
+*.out
+
+*.aux
+
+*.log
+
+*.toc
+
 *.dat
 
 .venv/

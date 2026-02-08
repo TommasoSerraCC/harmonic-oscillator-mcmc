@@ -47,12 +47,12 @@ if args.te:
                 break
 
     fig1, ax1 = plt.subplots(figsize=(8, 5))
-    ax1.plot(lag[1:], acf_y2[1:], 'bo', ms=5, label=r'dati $y^2$')
+    ax1.plot(lag[1:], acf_y2[1:], 'bo', ms=5, label=r'dati $C_{y^2}$')
     t_plot = np.linspace(1, lag[-1], 200)
     ax1.plot(t_plot, A_exp * np.exp(-t_plot / tau_exp), 'r-', lw=1.0,
              label=f'fit $\\tau_{{exp}}$={tau_exp:.1f}')
     ax1.set_xlabel('$n$')
-    ax1.set_ylabel(r'$\Gamma_{y^2}(n)$')
+    ax1.set_ylabel(r'$C_{y^2}(n)$')
     ax1.legend(fontsize=9)
     fig1.tight_layout()
     if args.save:
