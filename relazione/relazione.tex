@@ -105,7 +105,7 @@ La distribuzione di probabilità da campionare è quindi:
     P(y_0,\dots,y_{N_t-1}) = \frac{\exp\left\{ - \sum_{i=0}^{N_t-1} \left[y_i^2 \left(\frac{\eta}{2} + \frac{1}{\eta}\right) - \frac{1}{\eta} y_i y_{i+1}\right]\right\}}{\int \prod_{j=0}^{N_t-1} dy_j \exp\left\{ - \sum_{i=0}^{N_t-1} \left[y_i^2 \left(\frac{\eta}{2} + \frac{1}{\eta}\right) - \frac{1}{\eta} y_i y_{i+1}\right]\right\}}
 \end{equation}
 E' stata implementata una catena composta da 1 sweep di heat-bath e 5 sweep di over-relaxation (update microcanonico),
-che garantiscono aperiodicità e irriducibilità.
+che, combinati assieme, garantiscono aperiodicità e irriducibilità.
 
 \subsection{Heat-bath update}
 L'algoritmo heat-bath locale determina il nuovo valore $y_i^{t}$ del cammino in modo indipendente dal valore $y_i$ allo step precedente, campionando direttamente dalla distribuzione condizionata $P(y_i | y_{j \neq i})$ che è una gaussiana centrata in:
@@ -119,7 +119,7 @@ La varianza è:
 \end{equation}
 L'accettanza per il nuovo stato è pari a 1. Per campionare la suddetta gaussiana, si è utilizzato l'algoritmo Box-Muller.
 
-\subsection{Microcanonical update}
+\subsection{Update microcanonico}
 L'update microcanonico (over-relaxation) è un aggiornamento deterministico che preserva l'azione Euclidea, e quindi la probabilità di accettazione è sempre 1. Il nuovo valore $y_i^{t}$ viene calcolato come:
 \begin{equation}
     y_i^{t} = 2\mu - y_i
