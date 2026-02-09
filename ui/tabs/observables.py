@@ -382,7 +382,7 @@ class BlockingSubtab(tk.Frame):
         self.plot.set_layout(2, 3)
         for i, (name, lab) in enumerate(zip(obs_names, labels)):
             ax = self.plot.axes[i]
-            ax.plot(log2k[sel], bd[name][sel], '-o', ms=2)
+            ax.plot(log2k[sel], bd[name][sel], '-o', ms=1.2, markerfacecolor='none', markeredgewidth=0.6)
             ax.set_xlabel(r'$\log_2(k)$')
             ax.set_ylabel(lab)
             apply_grid(ax)
@@ -404,7 +404,7 @@ class BlockingSubtab(tk.Frame):
         for ic, (cn, lab) in enumerate(zip(corr_names, labels)):
             ax = self.plot.axes[ic]
             for nv in bd['n_check']:
-                ax.plot(log2k[sel], bd[cn][nv][sel], '-o', ms=2, label=f'n={nv}')
+                ax.plot(log2k[sel], bd[cn][nv][sel], '-o', ms=1.2, markerfacecolor='none', markeredgewidth=0.6, label=f'n={nv}')
             ax.set_xlabel(r'$\log_2(k)$')
             ax.set_ylabel(lab)
             ax.legend(fontsize=8)
@@ -489,7 +489,7 @@ class AutocorrSubtab(tk.Frame):
         ax = self.plot.axes[0]
         lag = tau_data['lag']
         acf = tau_data['acf']
-        ax.plot(lag[1:], acf[1:], 'o', color='black', ms=1.5,
+        ax.plot(lag[1:], acf[1:], 'o', color='black', ms=1.2, markerfacecolor='none', markeredgewidth=0.6,
                 label=r'dati $C_{y^2}$')
         t_plot = np.linspace(1, lag[-1], 200)
         A, tau = tau_data['A'], tau_data['tau']
@@ -593,7 +593,7 @@ class AutocorrSubtab(tk.Frame):
             return A * np.exp(-n / tau)
         self.plot.set_layout(1, 1)
         ax = self.plot.axes[0]
-        ax.plot(d['lag'][1:], d['acf'][1:], 'o', color='black', ms=1.5, label='dati')
+        ax.plot(d['lag'][1:], d['acf'][1:], 'o', color='black', ms=1.2, markerfacecolor='none', markeredgewidth=0.6, label='dati')
         t_plot = np.linspace(d['lf'][0], d['lf'][-1] * 1.3, 200)
         ax.plot(t_plot, _exp(t_plot, *d['popt']), **FIT_LINE_KW, label='fit')
         ax.set_xlabel('$n$')
@@ -609,7 +609,7 @@ class AutocorrSubtab(tk.Frame):
             return A * np.exp(-n / tau)
         ax_main, ax_res = self.plot.set_layout_with_residuals(height_ratios=(3, 1))
         lf = d['lf']
-        ax_main.plot(lf, d['af'], 'o', color='black', ms=1.5, label='dati')
+        ax_main.plot(lf, d['af'], 'o', color='black', ms=1.2, markerfacecolor='none', markeredgewidth=0.6, label='dati')
         t_plot = np.linspace(lf[0], lf[-1], 200)
         ax_main.plot(t_plot, _exp(t_plot, *d['popt']), **FIT_LINE_KW, label='fit')
         ax_main.set_ylabel(r'$C_{y^2}(n)$')

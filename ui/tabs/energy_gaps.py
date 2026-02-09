@@ -116,7 +116,7 @@ class EnergyGapsTab(tk.Frame):
             marker = MARKERS_FOR_CORR[cn]
             ax.errorbar(neta[sel], de[sel], yerr=de_err[sel],
                         fmt=marker, ms=SMALL_MS, color=COLORS[cn],
-                        label=CORR_DISPLAY[cn], capsize=2, elinewidth=0.8)
+                        label=CORR_DISPLAY[cn], capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
 
         ax.set_xlabel(r'$n\eta$')
         ax.set_ylabel(r'$\Delta E(n)$')
@@ -213,7 +213,7 @@ class EnergyGapsTab(tk.Frame):
         marker = MARKERS_FOR_CORR[cn]
         ax.errorbar(neta[plot_sel], de[plot_sel], yerr=de_err[plot_sel],
                     fmt=marker, ms=SMALL_MS, color=COLORS[cn],
-                    label=CORR_DISPLAY[cn], capsize=2, elinewidth=0.8)
+                    label=CORR_DISPLAY[cn], capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
         ax.axhline(d['wm'], **FIT_LINE_KW, label='fit')
         ax.axhspan(d['wm'] - d['wm_err'], d['wm'] + d['wm_err'],
                    alpha=0.15, color='r')
@@ -236,7 +236,7 @@ class EnergyGapsTab(tk.Frame):
         marker = MARKERS_FOR_CORR[cn]
         ax_main.errorbar(nf_eta, d['df'], yerr=d['ef'],
                          fmt=marker, ms=SMALL_MS, color=COLORS[cn],
-                         label=CORR_DISPLAY[cn], capsize=2, elinewidth=0.8)
+                         label=CORR_DISPLAY[cn], capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
         ax_main.axhline(d['wm'], **FIT_LINE_KW, label='fit')
         ax_main.axhspan(d['wm'] - d['wm_err'], d['wm'] + d['wm_err'],
                         alpha=0.15, color='r')

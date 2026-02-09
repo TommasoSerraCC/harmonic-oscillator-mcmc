@@ -93,10 +93,10 @@ for skip_val in sorted(data_map.keys()):
         e = np.array(errs[name])
         fig, ax = plt.subplots(figsize=(7, 5))
         if name in ('y2', 'E'):
-            ax.errorbar(eta_arr**2, m, yerr=e, fmt='o', ms=4, capsize=3, elinewidth=1.2)
+            ax.errorbar(eta_arr**2, m, yerr=e, fmt='o', ms=1.2, capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
             ax.set_xlabel(r'$\eta^2$')
         else:
-            ax.errorbar(eta_arr, m, yerr=e, fmt='o', ms=4, capsize=3, elinewidth=1.2)
+            ax.errorbar(eta_arr, m, yerr=e, fmt='o', ms=1.2, capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
             ax.set_xlabel(r'$\eta$')
         ax.set_ylabel(meanlabel)
         ax.grid(True, alpha=0.3)

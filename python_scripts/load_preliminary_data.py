@@ -73,7 +73,7 @@ colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red']
 for C, label, col in zip(corr_arrays, corr_labels, colors):
     # m_eff(n) = log(C(n)/C(n+1)) / eta
     m_eff = np.log(C[:-1] / C[1:]) / eta
-    ax2.plot(n_vals, m_eff, marker='o', ms=3, lw=1, color=col, label=label)
+    ax2.plot(n_vals, m_eff, marker='o', ms=1.2, lw=1, color=col, markerfacecolor='none', markeredgewidth=0.6, label=label)
 
 # Etichette asse
 ax2.set_xlabel('n')

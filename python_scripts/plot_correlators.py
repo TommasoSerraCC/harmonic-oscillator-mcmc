@@ -33,7 +33,7 @@ for i, (label, cname) in enumerate(zip(corr_labels, corr_names)):
     ax = axes[i]
     mean = data[:, 1 + 2*i]
     err = data[:, 2 + 2*i]
-    ax.errorbar(n, mean, yerr=err, fmt='o', ms=3, capsize=2, elinewidth=1.0)
+    ax.errorbar(n, mean, yerr=err, fmt='o', ms=1.2, capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
     ax.set_xlabel('$n$')
     ax.set_ylabel(label)
     ax.set_yscale('log')

@@ -76,7 +76,7 @@ for i, (label, cname) in enumerate(zip(corr_labels, corr_names)):
 
     results.append((cname, xi_fit, xi_err, de, de_err))
 
-    ax.errorbar(n, mean, yerr=err, fmt='o', ms=3, capsize=2, elinewidth=1.0, label='data')
+    ax.errorbar(n, mean, yerr=err, fmt='o', ms=1.2, capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6, label='data')
     if not np.isnan(xi_fit):
         nplot = np.linspace(1, n_fit[-1] * 1.5, 200)
         ax.plot(nplot, exp_model(nplot, A_fit, xi_fit), 'r-', lw=1.0,

@@ -340,7 +340,7 @@ class MultiNtSubtab(tk.Frame):
                 data = dm.load_connected_correlators(bhw, nstep, nt, th)
                 eta = float(bhw) / nt
                 ax.errorbar(data['n'] * eta, data[cn], yerr=data[cn + '_err'],
-                            fmt=marker, ms=SMALL_MS, capsize=2, elinewidth=0.8,
+                            fmt=marker, ms=SMALL_MS, capsize=2, elinewidth=0.35, markerfacecolor='none', markeredgewidth=0.5,
                             label=f'$N_t={nt}$')
         ax.set_xlabel(r'$n\eta$')
         ax.set_ylabel(CORR_LABELS[cn])
