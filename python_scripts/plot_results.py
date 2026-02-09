@@ -6,6 +6,8 @@ import os
 parser = argparse.ArgumentParser()
 parser.add_argument('--nt', type=int, required=True)
 parser.add_argument('--skip', type=int, default=0, help='thermalization steps')
+parser.add_argument('--bhw', type=int, required=True)
+parser.add_argument('--nstep', type=int, default=1000000)
 parser.add_argument('-te', action='store_true', help='plot tau_exp fit')
 parser.add_argument('-eg', action='store_true', help='plot energy gaps')
 parser.add_argument('-bo', action='store_true', help='plot blocking observables')
@@ -21,11 +23,12 @@ if not (args.te or args.eg or args.bo or args.jc):
 nt = args.nt
 skip = args.skip
 ncorr = nt // 2
-bhw = 10.0
+bhw = float(args.bhw)
 eta = bhw / nt
 
-resdir = f'results/nt{nt}_therm{skip}'
-plotdir = f'plots/nt{nt}_therm{skip}'
+basedir = f'bhw{args.bhw}_nstep{args.nstep}'
+resdir = f'results/{basedir}/nt{nt}_therm{skip}'
+plotdir = f'plots/{basedir}/nt{nt}_therm{skip}'
 os.makedirs(plotdir, exist_ok=True)
 
 # ========== 1. Tau_exp fit plot ==========
@@ -61,7 +64,7 @@ if args.te:
 
 # ========== 2. Energy gaps ==========
 if args.eg:
-    gap_data = np.loadtxt(f'{resdir}/energy_gaps.dat')
+    gap_data = np.loadtxt(f'{resdir}/energy_gaps.dat', ndmin=2)
     n_gap = gap_data[:, 0].astype(int)
     corr_labels = [r'$y$', r'$y^2$', r'$y^3$', r'$A$']
     colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red']
@@ -73,9 +76,9 @@ if args.eg:
     for i, (label, col) in enumerate(zip(corr_labels, colors)):
         de = gap_data[sel, 1 + 2*i]
         de_err = gap_data[sel, 2 + 2*i]
-        ax2.errorbar(n_gap[sel], de, yerr=de_err, fmt='o', ms=4, color=col,
+        ax2.errorbar(n_gap[sel] * eta, de, yerr=de_err, fmt='o', ms=4, color=col,
                      label=label, capsize=3, elinewidth=1.2)
-    ax2.set_xlabel('$n$')
+    ax2.set_xlabel(r'$n\eta$')
     ax2.set_ylabel(r'$\Delta E(n)$')
     ax2.set_ylim(0, 5)
     for yline in (1.0, 2.0, 3.0):
@@ -99,7 +102,7 @@ if args.bo:
     axes3 = axes3.flatten()
     for i, (label, slabel) in enumerate(zip(obs_labels, obs_sigma_labels)):
         ax = axes3[i]
-        ax.plot(np.log2(k_vals), block_obs[:, 1 + i], 'o', ms=4)
+        ax.plot(np.log2(k_vals), block_obs[:, 1 + i], '-o', ms=4)
         ax.set_xlabel(r'$\log_2(k)$')
         ax.set_ylabel(slabel)
     axes3[5].axis('off')
@@ -132,7 +135,7 @@ if args.jc:
         ax = axes4[ic]
         for jn, nv in enumerate(n_check_vals):
             col_idx = 1 + ic * n_per_corr + jn
-            ax.plot(np.log2(k_vals_j), block_jack[:, col_idx], 'o', ms=4,
+            ax.plot(np.log2(k_vals_j), block_jack[:, col_idx], '-o', ms=4,
                     label=f'n={nv}')
         ax.set_xlabel(r'$\log_2(k)$')
         ax.set_ylabel(slabel)

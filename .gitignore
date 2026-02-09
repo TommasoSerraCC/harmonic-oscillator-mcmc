@@ -15,6 +15,8 @@
 
 .venv/
 
+__pycache__/
+
 utils/notes.txt
 
 randomseed

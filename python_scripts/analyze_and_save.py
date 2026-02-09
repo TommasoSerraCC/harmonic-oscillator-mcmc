@@ -6,16 +6,20 @@ from scipy.optimize import curve_fit
 parser = argparse.ArgumentParser()
 parser.add_argument('--nt', type=int, required=True)
 parser.add_argument('--skip', type=int, default=0, help='thermalization steps to skip')
+parser.add_argument('--bhw', type=int, required=True)
+parser.add_argument('--nstep', type=int, default=1000000)
 args = parser.parse_args()
 
 nt = args.nt
 skip = args.skip
 ncorr = nt // 2
-bhw = 10.0
+bhw = float(args.bhw)
 eta = bhw / nt
 
+basedir = f'bhw{args.bhw}_nstep{args.nstep}'
+
 # ========== Load data ==========
-data = np.loadtxt(f'data/raw_data_nt{nt}.dat')
+data = np.loadtxt(f'data/{basedir}/raw_data_nt{nt}.dat')
 data = data[skip:]
 nsteps = data.shape[0]
 print(f"nt={nt}, skip={skip}, nsteps={nsteps}")
@@ -34,7 +38,7 @@ for name, m in zip(obs_names, obs_means):
     print(f"  <{name}> = {m:.6f}")
 
 # ========== Output directory ==========
-outdir = f'results/nt{nt}_therm{skip}'
+outdir = f'results/{basedir}/nt{nt}_therm{skip}'
 os.makedirs(outdir, exist_ok=True)
 
 # ========== Blocking for simple observables ==========
@@ -279,9 +283,9 @@ except:
 
 print(f"  tau_exp (fit y$^2$) = {tau_exp:.2f}")
 
-# Save tau_exp fit data: lag, C_{y^2} (first 50 points), and fit params
-lag_save = np.arange(51)
-C_y2_save = C_y2[:51]
+# Save tau_exp fit data: lag, C_{y^2} (first max_lag points), and fit params
+lag_save = np.arange(max_lag)
+C_y2_save = C_y2[:max_lag]
 np.savetxt(f'{outdir}/tau_exp_fit.dat', np.column_stack([lag_save, C_y2_save]),
            header=f"lag  C_{{y^2}}\n# fit_params: A={A_exp:.8e}  tau={tau_exp:.8e}", fmt='%16.8e')
 

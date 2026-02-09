@@ -1,28 +1,36 @@
       program main_data_collection
 
       implicit real*8 (a-h,o-z)
-      parameter (bhw=10.d0)  ! beta*h_bar*omega
-      parameter (n_nt=11)   ! number of different nt values
       parameter (nt_max=200)  ! maximum number of time slices
-      parameter (nsteps=1000000) ! number of MCMC steps (10^6)
       parameter (ncorr_max=100) ! maximum nt/2 = 200/2 = 100
+      parameter (max_nt_list=20)
       integer ncorr
       common /corr_params/ ncorr
-      integer nt_vals(n_nt)                ! number of time slices
+      real*8 bhw
+      integer nsteps
+      integer n_nt
+      integer nt_vals(max_nt_list)
+      integer energy_only
+      namelist /params/ bhw, nsteps, n_nt, nt_vals, energy_only
       integer nt, ncorr_points
-      integer istart  !! initial configuration flag
-      integer j, idx, i, n
-      real*8 y(nt_max)            ! array of the discretized path
-      real*8 ym, y2m, y3m, Am, em  ! measurements at each step
+      integer istart
+      integer j, idx, i, n, nprog
+      real*8 y(nt_max)
+      real*8 ym, y2m, y3m, Am, em
       real*8 ycm(ncorr_max), y2cm(ncorr_max)
       real*8 y3cm(ncorr_max), Acm(ncorr_max)
       external y1, y2, y3, A
       external y1_corr, y2_corr, y3_corr, A_corr
-      real*8 gamma, alpha, mu, sigma  ! gaussian parameters for the heat bath
-      real*8 eta                  ! adimensional_parameter : eta = a*omega
-      character*100 filename
+      real*8 gamma, alpha, mu, sigma
+      real*8 eta
+      character*200 filename
+      character*200 datadir
 
-c     Set nt values: 4, 12, 24, 30, 36, 42, 50, 75, 100, 150, 200
+c     Defaults
+      energy_only = 0
+      bhw = 10.d0
+      nsteps = 1000000
+      n_nt = 11
       nt_vals(1) = 4
       nt_vals(2) = 12
       nt_vals(3) = 24
@@ -35,7 +43,21 @@ c     Set nt values: 4, 12, 24, 30, 36, 42, 50, 75, 100, 150, 200
       nt_vals(10) = 150
       nt_vals(11) = 200
 
+c     Read namelist from stdin
+      read(*, nml=params)
+
+c     Build output directory
+      write(datadir, '(A,I0,A,I0)')
+     &  'data/bhw', nint(bhw), '_nstep', nsteps
+      call system('mkdir "'//trim(datadir)//'" 2>nul')
+
+      write(*,*) 'bhw =', bhw
+      write(*,*) 'nsteps =', nsteps
+      write(*,*) 'n_nt =', n_nt
+      write(*,*) 'Output: ', trim(datadir)
+
       istart = 0  ! cold start
+      nprog = max(nsteps / 10, 1)
 
 c     Initialize ran2 RNG
       call ranstart()
@@ -43,22 +65,25 @@ c     Initialize ran2 RNG
 c     Loop over different nt values
       do j = 1, n_nt
         nt = nt_vals(j)
-        ncorr_points = nt / 2  ! number of correlator points
+        ncorr_points = nt / 2
 
-        write(*,*) 'Running simulation with nt = ', nt
-        write(*,*) 'Number of correlator points: ', ncorr_points
-        write(*,*) 'Number of MCMC steps: ', nsteps
+        write(*,*) 'nt =', nt, '  ncorr =', ncorr_points
 
-        eta = bhw / dble(nt)   ! set eta value
+        eta = bhw / dble(nt)
         alpha = (eta / 2.d0) + (1.d0 / eta)
         sigma = 1.d0 / sqrt(2.d0 * alpha)
 
 c       Initialize path (cold start)
         call cold_start(y, nt)
 
-c       Open output file for this nt value
-        write(filename, '(A,I0,A)') 
-     &    'data/raw_data_nt', nt, '.dat'
+c       Open output file
+        if (energy_only .eq. 0) then
+          write(filename, '(A,I0,A)')
+     &      trim(datadir)//'/raw_data_nt', nt, '.dat'
+        else
+          write(filename, '(A,I0,A)')
+     &      trim(datadir)//'/raw_energy_nt', nt, '.dat'
+        end if
         open(unit=10, file=filename, status='unknown')
 
 c       Main MCMC loop
@@ -66,44 +91,47 @@ c       Main MCMC loop
 
           call total_update(y, nt, sigma, alpha, eta)
 
-c         Compute observables
-          call path_observable(y, nt, y1, ym)
-          call path_observable(y, nt, y2, y2m)
-          call path_observable(y, nt, y3, y3m)
-          call path_observable(y, nt, A, Am)
-          call path_ene(y, nt, eta, em)
+          if (energy_only .eq. 0) then
+c           Compute observables
+            call path_observable(y, nt, y1, ym)
+            call path_observable(y, nt, y2, y2m)
+            call path_observable(y, nt, y3, y3m)
+            call path_observable(y, nt, A, Am)
+            call path_ene(y, nt, eta, em)
 
-c         Compute correlators for all n from 1 to nt/2
-          do n = 1, ncorr_points
-            call set_corr_param(n)
-            call path_observable(y, nt, y1_corr, ycm(n))
-            call path_observable(y, nt, y2_corr, y2cm(n))
-            call path_observable(y, nt, y3_corr, y3cm(n))
-            call path_observable(y, nt, A_corr, Acm(n))
-          end do
+c           Compute correlators for all n from 1 to nt/2
+            do n = 1, ncorr_points
+              call set_corr_param(n)
+              call path_observable(y, nt, y1_corr, ycm(n))
+              call path_observable(y, nt, y2_corr, y2cm(n))
+              call path_observable(y, nt, y3_corr, y3cm(n))
+              call path_observable(y, nt, A_corr, Acm(n))
+            end do
 
-c         Write all data to file: y, y2, y3, A, E, then correlators
-          write(10, '(5(E20.12,1X))', advance='no') 
-     &      ym, y2m, y3m, Am, em
-          do n = 1, ncorr_points - 1
-            write(10, '(4(E20.12,1X))', advance='no')
-     &        ycm(n), y2cm(n), y3cm(n), Acm(n)
-          end do
-          write(10, '(4(E20.12,1X))')
-     &      ycm(ncorr_points), y2cm(ncorr_points),
-     &      y3cm(ncorr_points), Acm(ncorr_points)
+c           Write all data to file: y, y2, y3, A, E, then correlators
+            write(10, '(5(E20.12,1X))', advance='no') 
+     &        ym, y2m, y3m, Am, em
+            do n = 1, ncorr_points - 1
+              write(10, '(4(E20.12,1X))', advance='no')
+     &          ycm(n), y2cm(n), y3cm(n), Acm(n)
+            end do
+            write(10, '(4(E20.12,1X))')
+     &        ycm(ncorr_points), y2cm(ncorr_points),
+     &        y3cm(ncorr_points), Acm(ncorr_points)
+          else
+c           Energy-only mode: compute and write only energy
+            call path_ene(y, nt, eta, em)
+            write(10, '(E20.12)') em
+          end if
 
-c         Progress indicator every 100000 steps
-          if (mod(i, 100000) .eq. 0) then
+          if (mod(i, nprog) .eq. 0) then
             write(*,*) '  Step: ', i, ' / ', nsteps
           end if
 
         end do
 
         close(10)
-        write(*,*) 'Completed nt = ', nt
-        write(*,*) 'Data saved to: ', trim(filename)
-        write(*,*) ''
+        write(*,*) 'Done nt =', nt
 
       end do
 

@@ -5,6 +5,8 @@ import os
 import re
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--bhw', type=int, required=True)
+parser.add_argument('--nstep', type=int, default=1000000)
 parser.add_argument('--skip', type=int, default=None,
                     help='thermalization skip value (default: auto-detect all)')
 parser.add_argument('-oy', action='store_true', help='plot <y> vs eta')
@@ -20,8 +22,10 @@ show_flags = [args.oy, args.o2, args.o3, args.oA, args.oE]
 if not any(show_flags):
     show_flags = [True, True, True, True, True]
 
-# Scan results directory
-all_dirs = os.listdir('results') if os.path.isdir('results') else []
+# Scan results directory for this bhw/nstep/ntherm
+basedir = f'bhw{args.bhw}_nstep{args.nstep}'
+resbase = f'results/{basedir}'
+all_dirs = os.listdir(resbase) if os.path.isdir(resbase) else []
 
 # Collect (nt, skip) pairs
 data_map = {}  # skip -> list of (nt, filepath)
@@ -30,7 +34,7 @@ for d in all_dirs:
     if m:
         ntv = int(m.group(1))
         sk = int(m.group(2))
-        fpath = f'results/{d}/observables.dat'
+        fpath = f'{resbase}/{d}/observables.dat'
         if os.path.isfile(fpath):
             if sk not in data_map:
                 data_map[sk] = []
@@ -54,7 +58,7 @@ obs_names = ['y', 'y2', 'y3', 'A', 'E']
 obs_mean_labels = [r'$\langle y \rangle$', r'$\langle y^2 \rangle$',
                    r'$\langle y^3 \rangle$', r'$\langle A \rangle$',
                    r'$\langle E \rangle$']
-os.makedirs('plots', exist_ok=True)
+os.makedirs(f'plots/{basedir}', exist_ok=True)
 
 # Process each skip value separately
 for skip_val in sorted(data_map.keys()):
@@ -78,7 +82,7 @@ for skip_val in sorted(data_map.keys()):
         nt_arr.append(ntv)
     
     nt_arr = np.array(nt_arr)
-    eta_arr = 10.0 / nt_arr
+    eta_arr = float(args.bhw) / nt_arr
     
     # Plot each observable separately
     for i, (name, meanlabel, do_plot) in enumerate(
@@ -88,13 +92,17 @@ for skip_val in sorted(data_map.keys()):
         m = np.array(means[name])
         e = np.array(errs[name])
         fig, ax = plt.subplots(figsize=(7, 5))
-        ax.errorbar(eta_arr, m, yerr=e, fmt='o', ms=4, capsize=3, elinewidth=1.2)
-        ax.set_xlabel(r'$\eta = \beta\hbar\omega / N_t$')
+        if name in ('y2', 'E'):
+            ax.errorbar(eta_arr**2, m, yerr=e, fmt='o', ms=4, capsize=3, elinewidth=1.2)
+            ax.set_xlabel(r'$\eta^2$')
+        else:
+            ax.errorbar(eta_arr, m, yerr=e, fmt='o', ms=4, capsize=3, elinewidth=1.2)
+            ax.set_xlabel(r'$\eta$')
         ax.set_ylabel(meanlabel)
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
         if args.save:
-            outfile = f'plots/{name}_vs_eta_therm{skip_val}.png'
+            outfile = f'plots/{basedir}/{name}_vs_eta_therm{skip_val}.png'
             fig.savefig(outfile, dpi=150)
             print(f"  Saved {outfile}")
 
