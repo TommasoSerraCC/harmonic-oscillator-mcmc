@@ -17,10 +17,10 @@ from ui.core import data_manager as dm
 # ===== Style constants =====
 GRID_KW = dict(alpha=0.25, linewidth=0.4, linestyle='-')
 FIT_LINE_KW = dict(color='red', linestyle='-', linewidth=0.9)
-DATA_DOT_KW = dict(fmt='o', color='black', ms=1.2, capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
-RESIDUAL_DOT_KW = dict(marker='o', color='black', ms=1.5, linestyle='none', zorder=5)
+DATA_DOT_KW = dict(fmt='o', color='black', ms=4, capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
+RESIDUAL_DOT_KW = dict(marker='o', color='black', ms=4, linestyle='none', zorder=5)
 SMALL_MARKERS = ['o', 's', '^', 'v', 'D', '<', '>', 'p', 'h', 'X', 'd', '*']
-SMALL_MS = 1.2
+SMALL_MS = 4
 
 
 def format_value_with_uncertainty(value, error, n_sig=2):

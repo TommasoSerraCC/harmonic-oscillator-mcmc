@@ -7,6 +7,7 @@ from ui.tabs.correlators import CorrelatorsTab
 from ui.tabs.energy_gaps import EnergyGapsTab
 from ui.tabs.energy_vs_temp import EnergyVsTempTab
 from ui.tabs.results import ResultsTab
+from ui.tabs.histogram import HistogramTab
 
 
 class App(tk.Tk):
@@ -23,6 +24,7 @@ class App(tk.Tk):
         notebook.add(CorrelatorsTab(notebook), text='Correlatori')
         notebook.add(EnergyGapsTab(notebook), text='Gap Energetici')
         notebook.add(EnergyVsTempTab(notebook), text='E vs T')
+        notebook.add(HistogramTab(notebook), text='Istogramma')
         notebook.add(ResultsTab(notebook), text='Risultati')
 
 

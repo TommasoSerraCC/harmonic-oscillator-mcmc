@@ -62,6 +62,7 @@ i cui autostati in rappresentazione della posizione sono:
 dove $H_n$ sono i polinomi di Hermite. I rispettivi autovalori dell'energia sono:
 \begin{equation}
     E_n = \hbar\omega \left( n + \frac{1}{2} \right)
+    \label{eq:energy_levels}
 \end{equation}
 
 \subsection{Richiami di statistica quantistica e path integral Euclideo}
@@ -74,9 +75,9 @@ Possiamo esprimere la traccia nella base delle posizioni, ottenendo:
     Z = \int dx \bra{x} e^{-\beta H} \ket{x}
 \end{equation}
 Possiamo applicare la procedura del path integral analogamente al caso della propagazione in tempo reale
-sfruttando la sostituzione $t \to -i\tau = -i\beta$ passando al tempo immaginario tramite la rotazione di WIck
+sfruttando la sostituzione $t \to -i\tau = -i\beta$ passando al tempo immaginario tramite la rotazione di Wick
 (l'unica differenza risiede nella necessità di fissare le condizioni al contorno periodiche).
-la funzione di partizione in questa formulazione al limite del continuo diventa ($\hbar=1$):
+La funzione di partizione in questa formulazione al limite del continuo diventa ($\hbar=1$):
 \begin{equation}
     Z \propto \int_{x(0)=x(\beta)} \mathcal{D}x(\tau) e^{-S_E[x(\tau)]}
 \end{equation}
@@ -88,7 +89,7 @@ A questo punto introduciamo la media termodinamica di un operatore $O$:
 \begin{equation}
     \langle O \rangle = \sum_{n} P_{n} O_{n}
 \end{equation}
-Dove:
+dove:
 
 \begin{equation*}
     P_{n} = \frac{e^{-\beta E_n}}{Z} \quad\quad\quad O_{n} = \bra{n} O \ket{n}
@@ -103,7 +104,7 @@ Applicando la procedura del path integral anche al numeratore in modo simile, ot
 \end{equation}
 Risulta evidente come le medie termiche si ottengano come media su tutti i cammini periodici
 pesati con l'esponenziale dell'azione Euclidea. Possiamo stimare questi valori progettando
-una catena di Markov che campioni opportunamente lo spazio dei cammini rispettando la suddetta,
+una catena di Markov che campioni opportunamente lo spazio dei cammini rispettando la suddetta
 distribuzione. Nella simulazione numerica, i cammini vengono discretizzati in $N_t$ suddivisioni temporali,
 e sarà possibile analizzare il limite del continuo aumentando $N_t$.
 
@@ -135,6 +136,7 @@ Nel nostro caso, questo algoritmo è particolarmente efficiente poiché tale dis
 è semplicemente una gaussiana centrata in:
 \begin{equation}
     \mu_i = \frac{\gamma}{2\alpha} \quad\quad\quad \gamma = \frac{y_{i-1} + y_{i+1}}{\eta} \quad\quad\quad \alpha = \frac{\eta}{2} + \frac{1}{\eta}
+    \label{eq:hb_params}
 \end{equation}
 che dipende dai soli valori dei punti adiacenti $y_{i-1}$ e $y_{i+1}$.
 La varianza è:
@@ -150,8 +152,9 @@ preserva l'azione Euclidea, e quindi la probabilità di accettazione è sempre 1
 Il nuovo valore $y_i^{t}$ viene calcolato come:
 \begin{equation}
     y_i^{t} = 2\mu - y_i
+    \label{eq:overrelax}
 \end{equation}
-Dove $\mu_i$ è la media condizionata definita in precedenza.
+dove $\mu_i$ è la media condizionata definita in precedenza (equazione~\ref{eq:hb_params}).
 Ovvero stiamo riflettendo il punto $y_i$ rispetto alla media della Gaussiana.
 Questo tipo di aggiornamento è particolarmente efficace per ridurre le
 autocorrelazioni nei campioni ed è computazionalmente economico.
@@ -170,10 +173,12 @@ $\langle y^2 \rangle$, $\langle y^3 \rangle$, $\langle A \rangle$, dove $A$ è l
 interpolante del terzo stato eccitato dell'oscillatore, definito da:
 \begin{equation}
     A = y^3 - \frac{3}{2} y
+    \label{eq:operator_A}
 \end{equation}
 Si sono anche misurati i correlatori connessi:
 \begin{equation}
     C_O(n) = \langle O(n) O(0) \rangle - |\langle O \rangle|^2
+    \label{eq:connected_corr}
 \end{equation}
 per $n=0,1,\dots,\frac{N_t}{2}$ per gli operatori $\langle y \rangle$, 
 $\langle y^2 \rangle$, $\langle y^3 \rangle$, $\langle A \rangle$.
@@ -192,6 +197,7 @@ $\langle A \rangle$ si ottengono come semplice media delle osservabili corrispon
 (che dipendono solo dalla posizione) sui cammini campionati, mentre l'energia si calcola come:
 \begin{equation}
     \overline{H} = \left\langle \frac{1}{2 N_t} \sum_{i=0}^{N_t-1} y_i^2 + \frac{1}{2\eta} - \frac{1}{2N_t} \sum_{i=0}^{N_t-1} \frac{\left(y_{i+1} - y_i\right)^2}{\eta^2} \right\rangle
+    \label{eq:energy_estimator}
 \end{equation}
 Le stime dei correlatori si ottengono da:
 \begin{equation}
@@ -205,8 +211,8 @@ Per stimare le incertezze sulle osservabili primarie si è adottata la procedura
 di blocking. Le incertezze sui correlatori connessi e sui gap energetici
 sono state stimate usando il Jackknife a blocchi,
 ricercando il plateau per ottenere un valore affidabile gestendo
-le autocorrelazioni trai dati. Riportiamo in figura \ref{fig:blocking_uncertainties}
-e \ref{fig:jackknife_uncertainties} a scopo esemplificativo,
+le autocorrelazioni tra i dati. Riportiamo in figura \ref{fig:blocking_uncertainties}
+e \ref{fig:jackknife_uncertainties}, a scopo esemplificativo,
 l'andamento delle incertezze in funzione dell'ampiezza dei blocchi, in cui
 si può apprezzare la presenza del plateau, sia per il blocking sulle osservabili
 primarie che per il jackknife sui correlatori connessi.
@@ -216,19 +222,19 @@ primarie che per il jackknife sui correlatori connessi.
 \includegraphics[width=0.8\textwidth]{../plots/bhw10_nstep1000000/nt200_therm50000/blocking_observables.png}
 \caption{Andamento delle incertezze su $\langle y \rangle$, $\langle y^2 \rangle$, $\langle y^3 \rangle$, $\langle A \rangle$ e $\langle E \rangle$ in funzione dell'ampiezza dei blocchi per $\beta\hbar\omega=10$ e $N_t=200$.
 L'incertezza sull'energia sembra saturare in modo peggiore. In realtà l'escursione dei valori è
-relativamente piccola ma a causa dello zoom sull'asse delle ordinate appare amplificata}
+relativamente piccola ma, a causa dello zoom sull'asse delle ordinate, appare amplificata.}
 \label{fig:blocking_uncertainties}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{../plots/bhw10_nstep1000000/nt200_therm50000/blocking_jackknife.png}
-\caption{Andamento delle incertezze sui correlatori connessi per $n=1, 25, 50$ (esempio) in funzione dell'ampiezza dei blocchi per $\beta\hbar\omega=10$ e $N_t=200$}
+\caption{Andamento delle incertezze sui correlatori connessi per $n=1, 25, 50$ (esempio) in funzione dell'ampiezza dei blocchi per $\beta\hbar\omega=10$ e $N_t=200$.}
 \label{fig:jackknife_uncertainties}
 \end{figure}
 
 \subsection{Effetti di taglia finita}
-Riportiamo in figura l'andamento di $\langle y \rangle$e  $\langle y^2 \rangle$
+Riportiamo in figura~\ref{fig:combinata} l'andamento di $\langle y \rangle$ e $\langle y^2 \rangle$
 per $\beta\hbar\omega = 10$.
 %Grafici con le osservabili primarie
 \begin{figure}[H]
@@ -250,7 +256,7 @@ per $\beta\hbar\omega = 10$.
     di $\approx 0.5$ al limite del continuo.}
     \label{fig:combinata}
 \end{figure}
-Adesso mostriamo il grafico dell'energia. Si è effettuato un fit lineare in $\eta^2$
+Adesso mostriamo il grafico dell'energia (figura~\ref{fig:energy_continuum_fit}). Si è effettuato un fit lineare in $\eta^2$
 considerando i valori di $\eta < 0.5$, per testare la correttezza dell'approccio
 al limite del continuo e catturare gli scostamenti $O(\eta^2)$ per effetti di finite size
 (sono visibili anche gli scostamenti di ordine superiore per i valori di $\eta$ più grandi,
@@ -270,7 +276,7 @@ più grandi di $\eta$, non inclusi nel fit.}
 \includegraphics[width=0.8\textwidth]{../results/bhw10_nstep1000000/fits/continuum_E_20260210_125533.png}
 \caption{Stesso fit dell'energia ma mostrato con i residui normalizzati, nel solo range di valori
 di $\eta$ considerati per il fit. Il valore di energia al limite del continuo è compatibile con il valore teorico di
-$\approx0.5$, come si vede dalla tabella riassuntiva.}
+$\approx0.5$, come si vede dalla tabella riassuntiva (tabella~\ref{tab:risultati_fit_continuum}).}
 \label{fig:energy_continuum_fit_residuals}
 \end{figure}
 
@@ -283,7 +289,7 @@ Il valore del $\chi^2$ ridotto è un po' alto, il che potrebbe essere dovuto a u
 per statistica insufficiente o alla presenza di scostamenti non trascurabili di ordine superiore
 a $\eta^2$ anche per i valori più grandi di $\eta$ considerati nel fit. Il valore di $a$ è
 compatibile con il valore teorico di 0.5.}
-\label{tab:risultati_fit}
+\label{tab:risultati_fit_continuum}
 \begin{tabular}{l S[table-format=1.4(3)]}
 \toprule
 $a$            & 0.4996(3) \\
@@ -307,13 +313,14 @@ Riportiamo in figura \ref{fig:energy_vs_temp} l'andamento dell'energia in funzio
 Abbiamo eseguito un fit a 2 parametri con modello:
 \begin{equation}
     a + \frac{b}{e^{\beta\hbar\omega} - 1}
+    \label{eq:bose_model}
 \end{equation}
 % Tabella con i risultati del fit
 \setlength{\heavyrulewidth}{\lightrulewidth}
 \begin{table}[ht]
 \centering
 \caption{Risultati del fit.}
-\label{tab:risultati_fit}
+\label{tab:risultati_fit_evst}
 \begin{tabular}{l S[table-format=1.4(3)]}
 \toprule
 $a$            & 0.4985(4) \\
@@ -331,23 +338,27 @@ Il valore di aspettazione dell'energia e di $y^2$ in unità adimensionali sono u
 e risultano:
 \begin{equation}
     \langle H \rangle = \langle y^2 \rangle = \frac{1}{2} \frac{1 + e^{-\beta\hbar\omega}}{1 - e^{-\beta\hbar\omega}}
+    \label{eq:theory_energy}
 \end{equation}
 
 \subsection{Gap energetici}
 Per estrarre i gap energetici si ricorre al gap efficace, nel caso adimensionale definito da:
 \begin{equation}
     \Delta E(n) = \frac{1}{\eta} \log\left[\frac{C(n)}{C(n+1)}\right]
+    \label{eq:gap_efficace}
 \end{equation}
 Infatti per grandi valori di $\tau$ il correlatore connesso va come:
 \begin{equation}
     C(n) \sim e^{-\tau \Delta E }
+    \label{eq:corr_asymptotic}
 \end{equation}
 Il $\Delta E$ estratto si riferisce al primo livello eccitato $E_{\overline{m}}$
 tale che:
 \begin{equation}
     \bra{0} O \ket{\overline{m}} \neq 0
+    \label{eq:selection_rule}
 \end{equation}
-Usando la definizione di sopra otterremo una sequenza di stime del gap energetico
+Usando la definizione di sopra (equazione~\ref{eq:gap_efficace}) otterremo una sequenza di stime del gap energetico
 in funzione di $n$, che dovrebbe appiattirsi attorno a un plateau il quale corrisponde al gap.
 
 \begin{itemize}
@@ -356,6 +367,7 @@ in funzione di $n$, che dovrebbe appiattirsi attorno a un plateau il quale corri
     in quanto verifica anche:
 \begin{equation}
     \langle 0 | y | n \rangle = \frac{1}{\sqrt{2}} \delta_{n,1}
+    \label{eq:y_matrix_element}
 \end{equation}
 mentre $y^3$ ha sovrapposizione non nulla anche con $0$ e $3$, quindi il profilo dei gap
 converge lentamente al plateau, e prima che esso venga raggiunto in modo stabile,
@@ -367,10 +379,10 @@ e il rapporto diventa instabile, con incertezze enormi).
     \item \textbf{Gap $E_3 - E_0$}: Per stimare il terzo gap energetico si usa il
     correlatore connesso di $A$, ma a priori questo è fattibile solo
     per l'oscillatore armonico dato che ne conosciamo la soluzione analitica. 
-    Infatti $A$ è costruito ad hoc per essere proporzionale al polinomio di Hermite $H_3$,
-    che sappiamo essere l'autofunzione del terzo stato eccitato. Non è possibili invece
+    Infatti $A$ (equazione~\ref{eq:operator_A}) è costruito ad hoc per essere proporzionale al polinomio di Hermite $H_3$,
+    che sappiamo essere l'autofunzione del terzo stato eccitato. Non è possibile invece
     utilizzare $y^3$ come operatore interpolante per il terzo gap,
-    poiché ha sovrapposizione non nulla anche con $1$
+    poiché ha sovrapposizione non nulla anche con $1$.
 
 \end{itemize}
 
@@ -378,18 +390,18 @@ e il rapporto diventa instabile, con incertezze enormi).
 \centering
 \includegraphics[width=0.8\textwidth]{../plots/bhw10_nstep1000000/nt200_therm50000/energy_gaps_n50_plot.png}
 \caption{Gap efficaci con chiara manifestazione del plateau agli intervalli corretti.
-Dati corrispondenti a $\beta\hbar\omega=10$ e $N_t=200$
+Dati corrispondenti a $\beta\hbar\omega=10$ e $N_t=200$,
 tagliando i valori $n \eta > 2.5$, ovvero eliminando la parte maggiormente
 rumorosa e affetta da incertezze più grandi (comunque nella regione mantenuta,
 sono chiaramente visibili i plateau). Nella parte finale dei gap relativi a
 $A$ si inizia a vedere una forte instabilità dei dati.}
-\label{fig:energy_vs_temp}
+\label{fig:energy_gaps}
 \end{figure}
 
-Possiamo effettuare un fit costante 'naive' sui dati del plateau, per estrarre i valori dei gap
+Possiamo effettuare un fit costante 'naive' sui dati del plateau (figura~\ref{fig:energy_gaps}), per estrarre i valori dei gap
 energetici, tenendo a mente che i dati sono correlati tra loro, quindi è stato eseguito solo a scopo
 illustrativo e non è affidabile per estrarre stime precise con le opportune incertezze.
-Di seguito i risultati ottenuti:
+Di seguito i risultati ottenuti (tabella~\ref{tab:gap_energetici}):
 
 \setlength{\heavyrulewidth}{\lightrulewidth}
 \begin{table}[ht]
@@ -407,8 +419,47 @@ $E_3 - E_0$ & 2.999(2) & 3.000 \\
 \end{tabular}
 \end{table}
 
+subsection{Funzione d'onda dello stato fondamentale}
+Per ricostruire la funzione d'onda dello stato fondamentale,
+si è costruito un istogramma dei valori di $y$ campionati per 3 combinazioni
+di $\beta\hbar\omega$ e $N_t$, confrontandolo con la distribuzione di probabilità
+teorica data da:
+\begin{equation}
+    P(y) = |\psi_0(y)|^2 = \frac{1}{\sqrt[4]{\pi}} e^{-y^2}
+    \label{eq:ground_state_wavefunction}
+\end{equation}
+\begin{figure}[H]
+\centering
+\begin{subfigure}[c]{0.6\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../plots/istogrammi/bhw1.0_nt20_nstep30000_therm5000/ground_state_histogram.png}
+\end{subfigure}
+
+\vspace{0.5cm}
+
+\begin{subfigure}[c]{0.6\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../plots/istogrammi/bhw20.0_nt10_nstep30000_therm5000/ground_state_histogram.png}
+\end{subfigure}
+
+\vspace{0.5cm}
+
+\begin{subfigure}[c]{0.6\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../plots/istogrammi/bhw20.0_nt400_nstep30000_therm5000/ground_state_histogram.png}
+\end{subfigure}
+\caption{Istogrammi della ricostruzione della funzione d'onda dello stato fondamentale 
+per tre scelte di parametri, confrontati con la distribuzione di probabilità teorica.
+Sono stati utilizzati $3.5 \times 10^4$ campioni di configurazione per ciascun istogramma
+scartando i primi$5 \times 10^3$ campioni come fase di termalizzazione.}
+\label{fig:ground_state_wavefunction}
+\end{figure}
+
+
+
+
 Con i risultati ottenuti, nota la soluzione analitica dell'oscillatore e la sua termodinamica,
-possiamo certamente concludere che la catena di Markov implementata, campioni correttamente
+possiamo certamente concludere che la catena di Markov implementata campioni correttamente
 la distribuzione di probabilità dei cammini, dato che le stime delle osservabili primarie e dei
 gap energetici sono compatibili con i valori teorici attesi.
 Aumentando la statistica si potrebbero certamente ottenere risultati più precisi al limite del continuo.
