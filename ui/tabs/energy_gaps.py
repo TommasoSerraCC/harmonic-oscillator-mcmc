@@ -6,12 +6,14 @@ import os
 from ui.core import data_manager as dm
 from ui.core.plotting import (PlotFrame, ParamSelector, SavedFitsPanel,
                                apply_grid, plot_residuals, FIT_LINE_KW,
-                               SMALL_MS, format_value_with_uncertainty)
+                               format_value_with_uncertainty)
+
+SMALL_MS = 4  # Slightly increased marker size
 
 
 CORR_NAMES = ['yc', 'y2c', 'y3c', 'Ac']
 CORR_DISPLAY = {'yc': r'$y$', 'y2c': r'$y^2$', 'y3c': r'$y^3$', 'Ac': r'$A$'}
-COLORS = {'yc': 'tab:blue', 'y2c': 'tab:orange', 'y3c': 'tab:green', 'Ac': 'tab:red'}
+COLORS = {'yc': 'tab:blue', 'y2c': 'tab:purple', 'y3c': 'tab:green', 'Ac': 'tab:brown'}
 MARKERS_FOR_CORR = {'yc': 'o', 'y2c': 's', 'y3c': '^', 'Ac': 'D'}
 
 

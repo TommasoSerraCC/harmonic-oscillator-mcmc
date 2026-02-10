@@ -94,11 +94,12 @@ for skip_val in sorted(data_map.keys()):
         fig, ax = plt.subplots(figsize=(7, 5))
         if name in ('y2', 'E'):
             ax.errorbar(eta_arr**2, m, yerr=e, fmt='o', ms=1.2, capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
-            ax.set_xlabel(r'$\eta^2$')
+            ax.set_xlabel(r'$\eta^2$', fontsize=16)
         else:
             ax.errorbar(eta_arr, m, yerr=e, fmt='o', ms=1.2, capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
-            ax.set_xlabel(r'$\eta$')
-        ax.set_ylabel(meanlabel)
+            ax.set_xlabel(r'$\eta$', fontsize=16)
+        ax.set_ylabel(meanlabel, fontsize=16)
+        ax.tick_params(axis='both', which='major', labelsize=14)
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
         if args.save:

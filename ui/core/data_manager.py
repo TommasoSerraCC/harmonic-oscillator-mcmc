@@ -290,7 +290,11 @@ def get_available_etas_across_bhw():
 
 
 def collect_energy_vs_temperature(eta_target, therm=None, tolerance=0.001):
-    """Collect energy for fixed eta across different bhw."""
+    """Collect energy for fixed eta across different bhw.
+    
+    Includes both standard and energy-only datasets. For the same (bhw, nt, therm),
+    prefers complete data over energy-only if raw_data_nt*.dat file exists.
+    """
     results = []
     seen = set()
     for bhw, nstep, nt, therm_v in scan_results():
@@ -302,11 +306,18 @@ def collect_energy_vs_temperature(eta_target, therm=None, tolerance=0.001):
         key = (bhw, nt, therm_v)
         if key in seen:
             continue
-        seen.add(key)
         try:
             obs = load_observables(bhw, nstep, nt, therm_v)
         except Exception:
             continue
+        
+        # If energy-only and raw_data exists, skip (prefer complete analysis)
+        if is_energy_only(bhw, nstep, nt, therm_v):
+            raw_data_path = os.path.join(DATA_DIR, f'bhw{bhw}_nstep{nstep}', f'raw_data_nt{nt}.dat')
+            if os.path.isfile(raw_data_path):
+                continue
+        
+        seen.add(key)
         if 'E' in obs:
             results.append({
                 'bhw': bhw, 'nstep': nstep, 'nt': nt, 'therm': therm_v,

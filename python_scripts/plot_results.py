@@ -54,9 +54,10 @@ if args.te:
     t_plot = np.linspace(1, lag[-1], 200)
     ax1.plot(t_plot, A_exp * np.exp(-t_plot / tau_exp), 'r-', lw=1.0,
              label=f'fit $\\tau_{{exp}}$={tau_exp:.1f}')
-    ax1.set_xlabel('$n$')
-    ax1.set_ylabel(r'$C_{y^2}(n)$')
-    ax1.legend(fontsize=9)
+    ax1.set_xlabel('$n$', fontsize=16)
+    ax1.set_ylabel(r'$C_{y^2}(n)$', fontsize=16)
+    ax1.tick_params(axis='both', which='major', labelsize=14)
+    ax1.legend(fontsize=11)
     fig1.tight_layout()
     if args.save:
         fig1.savefig(f'{plotdir}/tau_exp_fit.png', dpi=150)
@@ -78,12 +79,13 @@ if args.eg:
         de_err = gap_data[sel, 2 + 2*i]
         ax2.errorbar(n_gap[sel] * eta, de, yerr=de_err, fmt='o', ms=1.2, color=col,
                      label=label, capsize=0.8, elinewidth=0.6, markerfacecolor='none', markeredgewidth=0.6)
-    ax2.set_xlabel(r'$n\eta$')
-    ax2.set_ylabel(r'$\Delta E(n)$')
+    ax2.set_xlabel(r'$n\eta$', fontsize=16)
+    ax2.set_ylabel(r'$\Delta E(n)$', fontsize=16)
+    ax2.tick_params(axis='both', which='major', labelsize=14)
     ax2.set_ylim(0, 5)
     for yline in (1.0, 2.0, 3.0):
         ax2.axhline(yline, color='k', ls='--', lw=0.5)
-    ax2.legend(fontsize=9)
+    ax2.legend(fontsize=11)
     fig2.tight_layout()
     if args.save:
         fig2.savefig(f'{plotdir}/energy_gaps.png', dpi=150)
@@ -103,8 +105,9 @@ if args.bo:
     for i, (label, slabel) in enumerate(zip(obs_labels, obs_sigma_labels)):
         ax = axes3[i]
         ax.plot(np.log2(k_vals), block_obs[:, 1 + i], '-o', ms=1.2, markerfacecolor='none', markeredgewidth=0.6)
-        ax.set_xlabel(r'$\log_2(k)$')
-        ax.set_ylabel(slabel)
+        ax.set_xlabel(r'$\log_2(k)$', fontsize=14)
+        ax.set_ylabel(slabel, fontsize=14)
+        ax.tick_params(axis='both', which='major', labelsize=12)
     axes3[5].axis('off')
     fig3.tight_layout()
     if args.save:
@@ -137,9 +140,10 @@ if args.jc:
             col_idx = 1 + ic * n_per_corr + jn
             ax.plot(np.log2(k_vals_j), block_jack[:, col_idx], '-o', ms=1.2, markerfacecolor='none', markeredgewidth=0.6,
                     label=f'n={nv}')
-        ax.set_xlabel(r'$\log_2(k)$')
-        ax.set_ylabel(slabel)
-        ax.legend(fontsize=8)
+        ax.set_xlabel(r'$\log_2(k)$', fontsize=14)
+        ax.set_ylabel(slabel, fontsize=14)
+        ax.tick_params(axis='both', which='major', labelsize=12)
+        ax.legend(fontsize=10)
     fig4.tight_layout()
     if args.save:
         fig4.savefig(f'{plotdir}/blocking_jackknife_correlators.png', dpi=150)
