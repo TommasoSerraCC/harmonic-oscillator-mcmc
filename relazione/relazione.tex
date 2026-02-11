@@ -1,4 +1,4 @@
-\documentclass[12pt,a4paper]{article}
+\documentclass[10pt,a4paper]{article}
 
 % Pacchetti per la lingua e i font
 \usepackage[utf8]{inputenc}
@@ -14,7 +14,7 @@
 \usepackage{physics} 
 
 % Per margini più simili all'immagine
-\usepackage[margin=1in]{geometry}
+\usepackage[margin=0.7in]{geometry}
 
 % Per includere immagini
 \usepackage{graphicx}
@@ -44,11 +44,12 @@
 
 \section{Introduzione}
 In questa relazione viene presentato un semplice studio dell'oscillatore armonico 
-quantistico tramite simulazioni Monte Carlo a catena di Markov (MCMC), 
-sfruttando la formulazione con l'integrale sui cammini. Viene ricostruita la 
-distribuzione di probabilità dello stato fondamentale, vengono stimate le medie 
+quantistico tramite simulazioni Markov Chain Monte Carlo (MCMC), 
+sfruttando la formulazione con l'integrale sui cammini. Vengono stimate le medie 
 termiche di alcune osservabili fisiche rilevanti e i primi gap energetici facendo 
-uso di opportuni operatori interpolanti e dei loro correlatori connessi.
+uso di opportuni operatori interpolanti e dei loro correlatori connessi. Infine,
+viene ricostruito il modulo quadro della funzione d'onda dello stato fondamentale,
+confrontandolo con la soluzione analitica.
 
 \subsection{Richiami oscillatore armonico}
 L'Hamiltoniana dell'oscillatore armonico è data da:
@@ -347,9 +348,9 @@ Per estrarre i gap energetici si ricorre al gap efficace, nel caso adimensionale
     \Delta E(n) = \frac{1}{\eta} \log\left[\frac{C(n)}{C(n+1)}\right]
     \label{eq:gap_efficace}
 \end{equation}
-Infatti per grandi valori di $\tau$ il correlatore connesso va come:
+Infatti per grandi valori di $n$ il correlatore connesso va come:
 \begin{equation}
-    C(n) \sim e^{-\tau \Delta E }
+    C(n) \sim e^{-n \eta \Delta E }
     \label{eq:corr_asymptotic}
 \end{equation}
 Il $\Delta E$ estratto si riferisce al primo livello eccitato $E_{\overline{m}}$
@@ -419,9 +420,9 @@ $E_3 - E_0$ & 2.999(2) & 3.000 \\
 \end{tabular}
 \end{table}
 
-subsection{Funzione d'onda dello stato fondamentale}
+\subsection{Funzione d'onda dello stato fondamentale}
 Per ricostruire la funzione d'onda dello stato fondamentale,
-si è costruito un istogramma dei valori di $y$ campionati per 3 combinazioni
+si è costruito un istogramma dei valori di $y$ campionati per tre combinazioni
 di $\beta\hbar\omega$ e $N_t$, confrontandolo con la distribuzione di probabilità
 teorica data da:
 \begin{equation}
@@ -430,6 +431,17 @@ teorica data da:
 \end{equation}
 \begin{figure}[H]
 \centering
+
+\begin{subfigure}[c]{0.6\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../plots/istogrammi/bhw20.0_nt400_nstep30000_therm5000/ground_state_histogram.png}
+\end{subfigure}
+
+\begin{subfigure}[c]{0.6\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../plots/istogrammi/bhw20.0_nt10_nstep30000_therm5000/ground_state_histogram.png}
+\end{subfigure}
+
 \begin{subfigure}[c]{0.6\textwidth}
 \centering
 \includegraphics[width=\textwidth]{../plots/istogrammi/bhw1.0_nt20_nstep30000_therm5000/ground_state_histogram.png}
@@ -437,31 +449,31 @@ teorica data da:
 
 \vspace{0.5cm}
 
-\begin{subfigure}[c]{0.6\textwidth}
-\centering
-\includegraphics[width=\textwidth]{../plots/istogrammi/bhw20.0_nt10_nstep30000_therm5000/ground_state_histogram.png}
-\end{subfigure}
-
 \vspace{0.5cm}
 
-\begin{subfigure}[c]{0.6\textwidth}
-\centering
-\includegraphics[width=\textwidth]{../plots/istogrammi/bhw20.0_nt400_nstep30000_therm5000/ground_state_histogram.png}
-\end{subfigure}
 \caption{Istogrammi della ricostruzione della funzione d'onda dello stato fondamentale 
 per tre scelte di parametri, confrontati con la distribuzione di probabilità teorica.
 Sono stati utilizzati $3.5 \times 10^4$ campioni di configurazione per ciascun istogramma
-scartando i primi$5 \times 10^3$ campioni come fase di termalizzazione.}
+scartando i primi $5 \times 10^3$ campioni come fase di termalizzazione. L'unico caso che
+ricostruisce adeguatamente la distribuzione dello stato fondamentale è quello con
+$\beta\hbar\omega=20$ e $N_t=400$ (figura in alto, con $\eta = 0.05$), che è abbastanza vicino al limite del continuo
+e ha una temperatura sufficientemente bassa. Il caso con $\beta\hbar\omega=20$ e $N_t=10$
+(figura centrale, con $\eta=2$) non riproduce adeguatamente la distribuzione poiché pur avendo una temperatura
+bassa, il passo temporale è troppo grande. Il caso con $\beta\hbar\omega=1$ e $N_t=20$
+(figura in basso, con $\eta=0.05$) pur avendo un passo temporale ridotto, non cattura il solo stato fondamentale
+poiché la temperatura è troppo alta per isolarlo.}
 \label{fig:ground_state_wavefunction}
 \end{figure}
 
 
-
+\section{Conclusioni}
 
 Con i risultati ottenuti, nota la soluzione analitica dell'oscillatore e la sua termodinamica,
-possiamo certamente concludere che la catena di Markov implementata campioni correttamente
+possiamo ragionevolmente concludere che la catena di Markov implementata campioni correttamente
 la distribuzione di probabilità dei cammini, dato che le stime delle osservabili primarie e dei
-gap energetici sono compatibili con i valori teorici attesi.
-Aumentando la statistica si potrebbero certamente ottenere risultati più precisi al limite del continuo.
+gap energetici sono compatibili con i valori teorici attesi e che nelle opportune condizioni
+siamo in grado di ricostruire adeguatamente il modulo quadro della funzione d'onda dello stato fondamentale.
+Aumentando la statistica si potrebbero ottenere risultati più precisi per estrarre
+i valori delle osservabili al limite del continuo.
 
 \end{document}
