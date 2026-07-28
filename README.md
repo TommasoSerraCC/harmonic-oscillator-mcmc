@@ -1,5 +1,9 @@
 # Quantum Harmonic Oscillator — Path Integral MCMC
 
+[![CI](https://github.com/TommasoSerraCC/harmonic-oscillator-mcmc/actions/workflows/ci.yml/badge.svg)](https://github.com/TommasoSerraCC/harmonic-oscillator-mcmc/actions/workflows/ci.yml)
+[![Documentation](https://readthedocs.org/projects/harmonic-oscillator-mcmc/badge/?version=latest)](https://harmonic-oscillator-mcmc.readthedocs.io/en/latest/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
 Thermodynamics and spectrum of the 1D quantum harmonic oscillator, studied with a
 Markov Chain Monte Carlo simulation of the Euclidean path integral.
 
@@ -271,9 +275,12 @@ make docs      # output in docs/_build/html
 
 The sources live in `docs/` and cover the physics, the algorithm, the usage of
 both the GUI and the CLI, the data formats, a reference for the Fortran
-routines, and the autodoc-generated Python API. `.readthedocs.yaml` is set up to
-build the same pages on Read the Docs; connect the repository from the Read the
-Docs dashboard to publish them.
+routines, and the autodoc-generated Python API.
+
+`.readthedocs.yaml` builds the same pages on Read the Docs. To publish them,
+import the repository from the Read the Docs dashboard; the badge above assumes
+the project keeps the default slug `harmonic-oscillator-mcmc`, so adjust the two
+URLs if you pick a different one.
 
 ---
 
