@@ -51,6 +51,7 @@ napoleon_use_rtype = False
 myst_enable_extensions = [
     'amsmath',
     'colon_fence',
+    'deflist',
     'dollarmath',
 ]
 

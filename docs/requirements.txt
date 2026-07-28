@@ -1,6 +1,9 @@
-# Dependencies for building the documentation on Read the Docs.
+# Dependencies for building the documentation.
 # The runtime packages are needed too, because autodoc imports the
 # modules it documents.
+#
+# sphinx-rtd-theme is used purely as a theme; the docs are published to
+# GitHub Pages by .github/workflows/docs.yml, not to Read the Docs.
 sphinx>=7.0
 sphinx-rtd-theme>=2.0
 myst-parser>=2.0

@@ -1,7 +1,7 @@
 # Quantum Harmonic Oscillator — Path Integral MCMC
 
 [![CI](https://github.com/TommasoSerraCC/harmonic-oscillator-mcmc/actions/workflows/ci.yml/badge.svg)](https://github.com/TommasoSerraCC/harmonic-oscillator-mcmc/actions/workflows/ci.yml)
-[![Documentation](https://readthedocs.org/projects/harmonic-oscillator-mcmc/badge/?version=latest)](https://harmonic-oscillator-mcmc.readthedocs.io/en/latest/)
+[![Documentation](https://github.com/TommasoSerraCC/harmonic-oscillator-mcmc/actions/workflows/docs.yml/badge.svg)](https://tommasoserracc.github.io/harmonic-oscillator-mcmc/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 Thermodynamics and spectrum of the 1D quantum harmonic oscillator, studied with a
@@ -277,10 +277,14 @@ The sources live in `docs/` and cover the physics, the algorithm, the usage of
 both the GUI and the CLI, the data formats, a reference for the Fortran
 routines, and the autodoc-generated Python API.
 
-`.readthedocs.yaml` builds the same pages on Read the Docs. To publish them,
-import the repository from the Read the Docs dashboard; the badge above assumes
-the project keeps the default slug `harmonic-oscillator-mcmc`, so adjust the two
-URLs if you pick a different one.
+The published copy lives at
+**<https://tommasoserracc.github.io/harmonic-oscillator-mcmc/>**. It is built and
+deployed by `.github/workflows/docs.yml` on every push to `main`; pull requests
+get a build check without deploying. The build runs with `-W`, so a broken
+cross-reference fails rather than shipping.
+
+Publishing requires *Settings → Pages → Build and deployment → Source:
+**GitHub Actions*** to be selected once for the repository.
 
 ---
 

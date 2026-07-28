@@ -72,7 +72,13 @@ gaps are compared with the values that went in.
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` builds the Fortran on Ubuntu, runs both
-suites against several Python versions, and builds this documentation.
-Documentation warnings are treated as errors, so a broken cross-reference
-fails the build.
+Two workflows run on GitHub Actions:
+
+`ci.yml`
+: Builds the Fortran on Ubuntu and runs its unit tests, then runs the
+  Python suite against Python 3.9, 3.11 and 3.12.
+
+`docs.yml`
+: Builds this documentation and, on pushes to `main`, deploys it to
+  GitHub Pages. Warnings are treated as errors, so a broken
+  cross-reference fails the build instead of shipping.
