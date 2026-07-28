@@ -45,6 +45,9 @@ jobs:
         run: touch docs/_build/html/.nojekyll
 
       - name: Upload the Pages artifact
+        # Only what gets deployed is worth uploading; pull requests stop
+        # at the build check above.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/_build/html
