@@ -4,7 +4,6 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import os
 import json
-import math
 
 try:
     from PIL import Image, ImageTk
@@ -12,6 +11,9 @@ try:
 except ImportError:
     HAS_PIL = False
 
+# Re-exported: the tabs import it from here, the implementation is
+# kept GUI-free so it can be unit tested without a display.
+from analysis.formatting import format_value_with_uncertainty
 from ui.core import data_manager as dm
 
 # ===== Style constants =====
@@ -21,21 +23,6 @@ DATA_DOT_KW = dict(fmt='o', color='black', ms=4, capsize=0.8, elinewidth=0.6, ma
 RESIDUAL_DOT_KW = dict(marker='o', color='black', ms=4, linestyle='none', zorder=5)
 SMALL_MARKERS = ['o', 's', '^', 'v', 'D', '<', '>', 'p', 'h', 'X', 'd', '*']
 SMALL_MS = 4
-
-
-def format_value_with_uncertainty(value, error, n_sig=2):
-    """Format value +/- error, rounding to n_sig significant figures of error.
-    Returns (val_str, err_str)."""
-    if error == 0 or not math.isfinite(error) or not math.isfinite(value):
-        return f'{value}', f'{error}'
-    mag = math.floor(math.log10(abs(error)))
-    decimals = -int(mag) + n_sig - 1
-    rounded_err = round(error, decimals)
-    rounded_val = round(value, decimals)
-    if decimals > 0:
-        return f'{rounded_val:.{decimals}f}', f'{rounded_err:.{decimals}f}'
-    else:
-        return f'{int(rounded_val)}', f'{int(rounded_err)}'
 
 
 def apply_grid(ax):

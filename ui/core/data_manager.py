@@ -5,6 +5,8 @@ import glob
 import json
 from datetime import datetime
 
+from analysis import pipeline
+
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 DATA_DIR = os.path.join(ROOT, 'data')
@@ -435,35 +437,7 @@ def get_unanalyzed_energy_only(bhw, nstep, therm):
 
 def analyze_energy_only(bhw, nstep, nt, skip):
     """Analyze energy-only raw data: blocking for mean and uncertainty of E."""
-    raw_path = os.path.join(DATA_DIR, f'bhw{bhw}_nstep{nstep}', f'raw_energy_nt{nt}.dat')
-    data = np.loadtxt(raw_path)
-    data = data[skip:]
-    nsteps_eff = len(data)
-
-    mean_E = data.mean()
-
-    # Blocking to estimate uncertainty
-    kmax = int(np.log2(nsteps_eff // 4))
-
-    def blocking_sigma(x, k):
-        nblocks = len(x) // k
-        trimmed = x[:nblocks * k].reshape(nblocks, k)
-        block_means = trimmed.mean(axis=1)
-        return block_means.std(ddof=1) / np.sqrt(nblocks)
-
-    block_size = min(1000, 2**kmax)
-    err_E = blocking_sigma(data, block_size)
-
-    # Save results
-    outdir = _resdir(bhw, nstep, nt, skip)
-    os.makedirs(outdir, exist_ok=True)
-
-    with open(os.path.join(outdir, 'observables.dat'), 'w') as f:
-        f.write("# observable  mean  sigma_blocking\n")
-        f.write(f"E  {mean_E:.8e}  {err_E:.8e}\n")
-
-    # Write marker
-    with open(os.path.join(outdir, 'energy_only.marker'), 'w') as f:
-        f.write("Energy-only dataset\n")
-
-    return mean_E, err_E
+    raw_path = os.path.join(DATA_DIR, f'bhw{bhw}_nstep{nstep}',
+                            f'raw_energy_nt{nt}.dat')
+    return pipeline.analyze_energy_only(
+        raw_path, _resdir(bhw, nstep, nt, skip), skip=skip)

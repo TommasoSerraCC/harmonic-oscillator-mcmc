@@ -25,6 +25,10 @@ plots/old_plots/
 .venv/
 __pycache__/
 *.pyc
+.pytest_cache/
+
+# ---- Generated documentation ----
+docs/_build/
 
 # NOTE: results/ and plots/ are intentionally tracked. They hold the
 # post-processed analysis (small .dat tables) and the figures used by

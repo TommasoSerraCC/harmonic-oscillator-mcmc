@@ -10,34 +10,46 @@
 
 FC     := gfortran
 FFLAGS := -O2
-PY     := python
 
 ifeq ($(OS),Windows_NT)
   EXE := .exe
+  PY  := python
 else
   EXE :=
+  PY  := python3
 endif
 
 MCMC_SRC := mcmc/mcmc_oscillator.f mcmc/phys_sub.f mcmc/rand.f
 MAIN_SRC := main.f $(MCMC_SRC)
 TEST_SRC := test/test.f $(MCMC_SRC)
 
-CLEANFILES := main$(EXE) test$(EXE) texput.log \
+# NOTE: the test binary is deliberately not called "test", otherwise on
+# POSIX (where EXE is empty) the file target would collide with the
+# phony target of the same name.
+TEST_BIN := run_tests$(EXE)
+
+CLEANFILES := main$(EXE) $(TEST_BIN) texput.log \
               relazione/*.aux relazione/*.log \
               relazione/*.toc relazione/*.out
 
-.PHONY: all test ui report clean help
+.PHONY: all test pytest docs ui report clean help
 
 all: main$(EXE)
 
 main$(EXE): $(MAIN_SRC)
 	$(FC) $(FFLAGS) -o $@ $(MAIN_SRC)
 
-test$(EXE): $(TEST_SRC)
+$(TEST_BIN): $(TEST_SRC)
 	$(FC) $(FFLAGS) -o $@ $(TEST_SRC)
 
-test: test$(EXE)
-	./test$(EXE)
+test: $(TEST_BIN)
+	./$(TEST_BIN)
+
+pytest:
+	$(PY) -m pytest
+
+docs:
+	$(PY) -m sphinx -b html docs docs/_build/html
 
 ui:
 	$(PY) run_ui.py

@@ -1,0 +1,10 @@
+# Dependencies for building the documentation on Read the Docs.
+# The runtime packages are needed too, because autodoc imports the
+# modules it documents.
+sphinx>=7.0
+sphinx-rtd-theme>=2.0
+myst-parser>=2.0
+
+numpy>=1.20.0
+matplotlib>=3.4.0
+scipy>=1.7.0

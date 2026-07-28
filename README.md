@@ -5,8 +5,12 @@ Markov Chain Monte Carlo simulation of the Euclidean path integral.
 
 A Fortran core generates the Markov chain, a NumPy layer does the statistical
 analysis (blocking, jackknife, autocorrelations), and a Tkinter GUI ties the two
-together and provides interactive fitting. The full write-up (in Italian) is in
-[`relazione/relazione.pdf`](relazione/relazione.pdf).
+together and provides interactive fitting. The full write-up is in
+[`relazione/relazione.pdf`](relazione/relazione.pdf); `relazione/oscillator.pdf`
+keeps the original Italian version.
+
+Full documentation is built with Sphinx from [`docs/`](docs/) — see
+[Documentation](#documentation) below.
 
 ---
 
@@ -43,14 +47,19 @@ sweeps, which keeps autocorrelation times of order 1.
 ## Repository layout
 
 ```
+Makefile                  build, test, docs and report targets
 main.f                    simulation driver, reads its parameters as a Fortran namelist
 mcmc/
   mcmc_oscillator.f       heat bath, over-relaxation, Box-Muller, Euclidean action
   phys_sub.f              observables (y, y², y³, A), correlators, energy estimator
   rand.f                  ran2 RNG (Numerical Recipes) with seed persistence
 test/test.f               unit tests for the Fortran core
+analysis/
+  statistics.py           blocking, jackknife and autocorrelation estimators
+  pipeline.py             raw chain in, result tables out
+  formatting.py           value ± uncertainty rounding
 python_scripts/
-  analyze_and_save.py     main analysis: blocking, jackknife, gaps, autocorrelations
+  analyze_and_save.py     CLI wrapper around analysis.pipeline
   fit_correlation_length.py   exponential fits of the connected correlators
   plot_results.py         CLI plots: blocking, jackknife, gaps, autocorrelation
   plot_summary.py         CLI plots: observables vs η
@@ -61,6 +70,8 @@ ui/
   core/plotting.py        embedded matplotlib canvas, shared widgets and styling
   core/ground_state_sim.py    vectorised NumPy re-implementation of the chain
   tabs/                   one module per tab
+tests/                    pytest suite for the Python layer
+docs/                     Sphinx documentation sources
 run_ui.py                 GUI entry point
 relazione/                LaTeX report and its PDF
 results/                  post-processed analysis tables and saved fits (tracked)
@@ -78,8 +89,11 @@ data/                     raw Markov chains (NOT tracked — regenerate locally)
   `pip install -r requirements.txt`
 - **pdflatex** — only needed to rebuild the report
 
+For the test suite and the documentation install `requirements-dev.txt` instead.
+
 Tkinter ships with the standard CPython installer on Windows and macOS; on Debian
-or Ubuntu install `python3-tk`.
+or Ubuntu install `python3-tk`. The analysis layer itself does not import Tkinter,
+so the command-line workflow and the tests run without it.
 
 ---
 
@@ -88,6 +102,8 @@ or Ubuntu install `python3-tk`.
 ```sh
 make            # builds ./main (main.exe on Windows)
 make test       # builds and runs the Fortran unit tests
+make pytest     # runs the Python test suite
+make docs       # builds the Sphinx documentation
 make clean      # removes executables and LaTeX leftovers
 make help       # lists all targets
 ```
@@ -219,15 +235,45 @@ tracked, so it builds from a fresh clone without re-running any simulation.
 ## Tests
 
 ```sh
-make test
+make test      # Fortran unit tests
+make pytest    # Python test suite
 ```
 
-The suite checks the uniform RNG (mean and variance), the Box-Muller transform
-(mean, variance and kurtosis), periodic neighbour indexing, **exact conservation
-of the Euclidean action by the over-relaxation sweep**, the equilibrium values of
-`⟨y⟩` and `⟨y²⟩` for the heat bath and for the production update, the energy
-estimator, and the consistency of the correlator machinery at zero separation.
-It exits with status 1 if any check fails.
+Both run in CI on every push (`.github/workflows/ci.yml`), together with a
+documentation build that treats warnings as errors.
+
+The **Fortran suite** checks the uniform RNG (mean and variance), the Box-Muller
+transform (mean, variance and kurtosis), periodic neighbour indexing, **exact
+conservation of the Euclidean action by the over-relaxation sweep**, the
+equilibrium values of `⟨y⟩` and `⟨y²⟩` for the heat bath and for the production
+update, the energy estimator, and the consistency of the correlator machinery at
+zero separation. It exits with status 1 if any check fails.
+
+The **Python suite** validates the estimators against independently known
+answers rather than against previous output:
+
+- AR(1) series, whose autocorrelation `ρ^k` and integrated time `ρ/(1-ρ)` are
+  known analytically, pin the blocking plateau and the autocorrelation estimator;
+- the vectorised jackknife is cross-checked against an explicit leave-one-block-out
+  loop, for both the connected correlator and the energy gap;
+- exact special cases (unit blocks reduce to the standard error; a pure
+  exponential correlator gives a flat gap `1/(ξη)`);
+- the NumPy sampler must reproduce the ground state — mean 0, variance ½,
+  vanishing odd moments, Gaussian kurtosis;
+- a real analysis is written and read back through every `data_manager` loader,
+  pinning the file-format contract between the pipeline and the GUI.
+
+## Documentation
+
+```sh
+make docs      # output in docs/_build/html
+```
+
+The sources live in `docs/` and cover the physics, the algorithm, the usage of
+both the GUI and the CLI, the data formats, a reference for the Fortran
+routines, and the autodoc-generated Python API. `.readthedocs.yaml` is set up to
+build the same pages on Read the Docs; connect the repository from the Read the
+Docs dashboard to publish them.
 
 ---
 

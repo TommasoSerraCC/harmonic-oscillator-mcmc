@@ -1,280 +1,281 @@
 \documentclass[10pt,a4paper]{article}
 
-% Pacchetti per la lingua e i font
+% Language and font packages
 \usepackage[utf8]{inputenc}
-\usepackage[italian]{babel}
+\usepackage[english]{babel}
 \usepackage[T1]{fontenc}
 
-% Pacchetti matematici fondamentali
+% Core mathematics packages
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 
-% Pacchetto per la notazione fisica (Bra-Ket)
-\usepackage{physics} 
+% Physics notation (bra-ket)
+\usepackage{physics}
 
-% Per margini più simili all'immagine
+% Margins
 \usepackage[margin=0.7in]{geometry}
 
-% Per includere immagini
+% Images
 \usepackage{graphicx}
 
-% Per tabelle pulite
+% Clean tables
 \usepackage{booktabs}
 
-% Per numeri e incertezze
-\usepackage{siunitx} 
+% Numbers and uncertainties
+\usepackage{siunitx}
 
-% Per posizionare le figure con [H] (qui e non flottante)
+% Non-floating figure placement with [H]
 \usepackage{float}
 
-% Per subfigure
+% Subfigures
 \usepackage{subcaption}
 
-% Distanzia la didascalia dalla tabella
+% Spacing between caption and table
 \usepackage[skip=10pt]{caption}
 
 
-\title{\textbf{Studio dell'oscillatore armonico quantistico nel formalismo del path integral tramite MCMC}}
+\title{\textbf{A study of the quantum harmonic oscillator in the path integral formalism via MCMC}}
 \author{Tommaso Serra}
-\date{\today}
+% Fixed to the date of the original report rather than \today, so that
+% recompiling does not rewrite it.
+\date{11 February 2026}
 
 \begin{document}
 \maketitle
 
-\section{Introduzione}
-In questa relazione viene presentato un semplice studio dell'oscillatore armonico 
-quantistico tramite simulazioni Markov Chain Monte Carlo (MCMC), 
-sfruttando la formulazione con l'integrale sui cammini. Vengono stimate le medie 
-termiche di alcune osservabili fisiche rilevanti e i primi gap energetici facendo 
-uso di opportuni operatori interpolanti e dei loro correlatori connessi. Infine,
-viene ricostruito il modulo quadro della funzione d'onda dello stato fondamentale,
-confrontandolo con la soluzione analitica.
+\section{Introduction}
+This report presents a simple study of the quantum harmonic oscillator by means of
+Markov Chain Monte Carlo (MCMC) simulations, using the path integral formulation.
+We estimate the thermal averages of a few relevant physical observables and the
+first energy gaps, making use of suitable interpolating operators and of their
+connected correlators. Finally, we reconstruct the squared modulus of the
+ground-state wave function and compare it with the analytic solution.
 
-\subsection{Richiami oscillatore armonico}
-L'Hamiltoniana dell'oscillatore armonico è data da:
+\subsection{The harmonic oscillator}
+The Hamiltonian of the harmonic oscillator is
 \begin{equation}
     H = -\frac{\hbar^2}{2m} \frac{d^2}{dx^2} + \frac{1}{2}m\omega^2x^2
 \end{equation}
-i cui autostati in rappresentazione della posizione sono:
+whose eigenstates in the position representation are
 \begin{equation}
     \psi_n(x) = \frac{1}{\sqrt{2^n n!}} \left( \frac{m\omega}{\pi\hbar} \right)^{1/4} e^{-\frac{m\omega x^2}{2\hbar}} H_n\left( \sqrt{\frac{m\omega}{\hbar}} x \right)
 \end{equation}
-dove $H_n$ sono i polinomi di Hermite. I rispettivi autovalori dell'energia sono:
+where the $H_n$ are the Hermite polynomials. The corresponding energy eigenvalues are
 \begin{equation}
     E_n = \hbar\omega \left( n + \frac{1}{2} \right)
     \label{eq:energy_levels}
 \end{equation}
 
-\subsection{Richiami di statistica quantistica e path integral Euclideo}
-La funzione di partizione di un sistema quantistico si calcola come:
+\subsection{Quantum statistics and the Euclidean path integral}
+The partition function of a quantum system is computed as
 \begin{equation}
     Z = \text{Tr}(e^{-\beta H})
 \end{equation}
-Per rendere evidente la connessione col path integral applicato alla
-propagazione in tempo reale, può essere espressa come:
+To make the connection with the path integral for real-time propagation explicit,
+it can be written as
 \begin{equation}
     Z = \int dx \bra{x} e^{-\beta H} \ket{x}
 \end{equation}
-Possiamo applicare la stessa procedura del path integral effettuando la sostituzione
-$t \to -i\tau = -i\beta$ passando al tempo immaginario tramite la rotazione di Wick
-(l'unica differenza risiede nella necessità di fissare le condizioni al contorno periodiche).
-La funzione di partizione in questa formulazione al limite del continuo diventa ($\hbar=1$):
+We can apply the same path integral procedure by performing the substitution
+$t \to -i\tau = -i\beta$, moving to imaginary time through the Wick rotation
+(the only difference lies in the need to impose periodic boundary conditions).
+In this formulation the partition function, in the continuum limit, becomes
+(with $\hbar=1$)
 \begin{equation}
     Z \propto \int_{x(0)=x(\beta)} \mathcal{D}x(\tau) e^{-S_E[x(\tau)]}
 \end{equation}
-dove $S_E$ è l'azione Euclidea data da:
+where $S_E$ is the Euclidean action, given by
 \begin{equation}
     S_E[x(\tau)] = \int_0^\beta d\tau' \left[ \frac{1}{2} m \left( \frac{dx}{d\tau'} \right)^2 + V(x(\tau')) \right]
 \end{equation}
-A questo punto introduciamo la media termodinamica di un operatore $O$:
+At this point we introduce the thermodynamic average of an operator $O$:
 \begin{equation}
     \langle O \rangle = \sum_{n} P_{n} O_{n}
 \end{equation}
-dove:
-
+where
 \begin{equation*}
     P_{n} = \frac{e^{-\beta E_n}}{Z} \quad\quad\quad O_{n} = \bra{n} O \ket{n}
 \end{equation*}
-Quindi:
+so that
 \begin{equation}
     \langle O \rangle = \frac{\text{Tr}(O e^{-\beta H})}{Z}
 \end{equation}
-Applicando la procedura del path integral anche al numeratore in modo simile, otteniamo:
+Applying the path integral procedure to the numerator in the same way, we obtain
 \begin{equation}
     \langle O \rangle = \frac{\int \mathcal{D}x(\tau) e^{-S_E[x(\tau)]} O[x(\tau)]}{\int \mathcal{D}x(\tau) e^{-S_E[x(\tau)]}}
 \end{equation}
-Quindi le medie termiche si ottengono come media su tutti i cammini periodici
-pesati con l'esponenziale dell'azione Euclidea. Possiamo stimare questi valori progettando
-una catena di Markov che campioni opportunamente lo spazio dei cammini rispettando la suddetta
-distribuzione. Nella simulazione numerica, i cammini vengono discretizzati in $N_t$ suddivisioni temporali,
-e sarà possibile analizzare il limite del continuo diminuendo il passo temporale $\frac{\beta}{N_t}$
-per $\beta$ fissato.
+Thermal averages are therefore obtained as averages over all periodic paths,
+weighted by the exponential of the Euclidean action. We can estimate these values
+by designing a Markov chain that samples the space of paths according to the above
+distribution. In the numerical simulation the paths are discretised into $N_t$ time
+slices, and the continuum limit can be analysed by decreasing the time step
+$\frac{\beta}{N_t}$ at fixed $\beta$.
 
-\section{Catena di Markov}
-L'azione Euclidea discreta per un cammino $x_i$ con $i=0,1,...,N-1$ è data da:
+\section{Markov chain}
+The discrete Euclidean action for a path $x_i$ with $i=0,1,\dots,N-1$ is
 \begin{equation}
     S_E^{(L)}[x_i] = a \sum_{i=0}^{N_t-1} \left[ \frac{m\omega^2 x_i^2}{2} + \frac{m}{2} \left(\frac{x_{i+1}-x_i}{a}\right)^2 \right]
 \end{equation}
-Conviene passare a unità adimensionali ponendo:
+It is convenient to move to dimensionless units by setting
 \begin{equation}
     \eta = a \omega \quad\quad\quad y_i = \frac{x_i}{l} \quad\quad\quad l = \sqrt{\frac{1}{m\omega}}
 \end{equation}
-dove $\frac{1}{\omega}$ è il tempo scala del sistema. Quindi l'azione diventa:
+where $\frac{1}{\omega}$ is the characteristic time scale of the system. The action
+then becomes
 \begin{equation}
     S_E^{(L)} = \sum_{i=0}^{N_t-1} \left[ y_i^2 \left( \frac{\eta}{2} + \frac{1}{\eta}\right) - \frac{1}{\eta} y_i y_{i+1}\right]
 \end{equation}
-La distribuzione di probabilità da campionare è quindi:
+The probability distribution to be sampled is therefore
 \begin{equation}
     P(y_0,\dots,y_{N_t-1}) = \frac{\exp\left\{ - \sum_{i=0}^{N_t-1} \left[y_i^2 \left(\frac{\eta}{2} + \frac{1}{\eta}\right) - \frac{1}{\eta} y_i y_{i+1}\right]\right\}}{\int \prod_{j=0}^{N_t-1} dy_j \exp\left\{ - \sum_{i=0}^{N_t-1} \left[y_i^2 \left(\frac{\eta}{2} + \frac{1}{\eta}\right) - \frac{1}{\eta} y_i y_{i+1}\right]\right\}}
 \end{equation}
-E' stata implementata una catena composta da 1 sweep di heat-bath e 5 sweep di over-relaxation (update microcanonico),
-che, combinati assieme, garantiscono aperiodicità e irriducibilità.
+We implemented a chain made of 1 heat-bath sweep and 5 over-relaxation
+(microcanonical) sweeps which, combined together, guarantee aperiodicity and
+irreducibility.
 
 \subsection{Heat-bath update}
-L'algoritmo heat-bath locale determina il nuovo valore $y_i^{t}$
-del cammino in modo indipendente dal valore $y_i$ allo step precedente,
-campionando direttamente dalla distribuzione condizionata $P(y_i | y_{j \neq i})$.
-Nel nostro caso, questo algoritmo è particolarmente efficiente poiché tale distribuzione
-è semplicemente una gaussiana centrata in:
+The local heat-bath algorithm determines the new value $y_i^{t}$ of the path
+independently of the value $y_i$ at the previous step, by sampling directly from
+the conditional distribution $P(y_i | y_{j \neq i})$. In our case this algorithm is
+particularly efficient, since that distribution is simply a Gaussian centred at
 \begin{equation}
     \mu_i = \frac{\gamma}{2\alpha} \quad\quad\quad \gamma = \frac{y_{i-1} + y_{i+1}}{\eta} \quad\quad\quad \alpha = \frac{\eta}{2} + \frac{1}{\eta}
     \label{eq:hb_params}
 \end{equation}
-che dipende dai soli valori dei punti adiacenti $y_{i-1}$ e $y_{i+1}$.
-La varianza è:
+which depends only on the values of the adjacent points $y_{i-1}$ and $y_{i+1}$.
+The variance is
 \begin{equation}
     \sigma^2 = \frac{1}{2\alpha}
 \end{equation}
-L'accettanza per il nuovo stato è pari a 1. Per campionare tale gaussiana
-si usa l'algoritmo Box-Muller.
+The acceptance for the new state is equal to 1. The Box-Muller algorithm is used to
+sample this Gaussian.
 
-\subsection{Update microcanonico}
-L'update microcanonico (over-relaxation) è un aggiornamento deterministico che
-preserva l'azione Euclidea, e quindi la probabilità di accettazione è sempre 1.
-Il nuovo valore $y_i^{t}$ viene calcolato come:
+\subsection{Microcanonical update}
+The microcanonical (over-relaxation) update is a deterministic update that preserves
+the Euclidean action, so that the acceptance probability is always 1. The new value
+$y_i^{t}$ is computed as
 \begin{equation}
     y_i^{t} = 2\mu - y_i
     \label{eq:overrelax}
 \end{equation}
-dove $\mu$ è la media condizionata definita in precedenza (equazione~\ref{eq:hb_params}).
-Ovvero stiamo riflettendo il punto $y_i$ rispetto alla media della Gaussiana.
-Questo tipo di aggiornamento è particolarmente efficace per ridurre le
-autocorrelazioni nei campioni ed è computazionalmente economico.
+where $\mu$ is the conditional mean defined above (equation~\ref{eq:hb_params}).
+That is, we are reflecting the point $y_i$ about the mean of the Gaussian. This kind
+of update is particularly effective at reducing autocorrelations between samples and
+is computationally cheap.
 
-\section{Simulazione e raccolta dati}
+\section{Simulation and data collection}
 
-\subsection{Parametri della simulazione}
-Per studiare l'andamento dell'energia in funzione della temperatura e verificare
-l'aderenza alla teoria si è fissato $\eta = 0.1$ variando $\beta\hbar\omega$ da 1 a 20.
-Dopodiché si è fissato $\beta\hbar\omega = 10$ usando dei valori $N_t$
-da 4 a 200 per studiare il limite del continuo delle osservabili e i primi tre gap energetici,
-stimati tramite i correlatori connessi di $y$, $y^2$, $y^3$ e $A$ (usando solo i valori più
-grandi di $N_t$).
+\subsection{Simulation parameters}
+In order to study the behaviour of the energy as a function of temperature and to
+verify the agreement with theory, we fixed $\eta = 0.1$ and varied $\beta\hbar\omega$
+from 1 to 20. We then fixed $\beta\hbar\omega = 10$, using values of $N_t$ from 4 to
+200, in order to study the continuum limit of the observables and the first three
+energy gaps, estimated through the connected correlators of $y$, $y^2$, $y^3$ and
+$A$ (using only the largest values of $N_t$).
 
-Abbiamo fissato un numero di step della catena di Markov pari a $10^7$
-campionando le osservabili ogni 10 step.
-La particolare combinazione di heat-bath, over-relaxation e frequenza di campionamento
-ha fatto in modo da avere tempi di
-autocorrelazione molto brevi (dell'ordine dell'unità fino a un
-massimo di poche decine) e un $\tau_{exp}$ molto piccolo.
-Si è scelta una partenza a caldo, inizializzando il cammino con
-valori casuali estratti con pdf uniforme in $[-1,1]$ scartando per scrupolosità
-$5\times 10^5$ passi di termalizzazione.
+We fixed the number of Markov chain steps to $10^7$, sampling the observables every
+10 steps. The particular combination of heat bath, over-relaxation and sampling
+frequency resulted in very short autocorrelation times (of order unity, up to a
+maximum of a few tens) and a very small $\tau_{exp}$.
+We chose a hot start, initialising the path with random values drawn from a uniform
+pdf on $[-1,1]$ and discarding, for safety, $5\times 10^5$ thermalisation steps.
 
-\subsection{Osservabili misurate}
-Si sono misurate $\langle H \rangle$, $\langle y \rangle$, 
-$\langle y^2 \rangle$, $\langle y^3 \rangle$, $\langle A \rangle$, dove $A$ è l'operatore
-interpolante del terzo stato eccitato dell'oscillatore, definito da:
+\subsection{Measured observables}
+We measured $\langle H \rangle$, $\langle y \rangle$, $\langle y^2 \rangle$,
+$\langle y^3 \rangle$ and $\langle A \rangle$, where $A$ is the interpolating
+operator of the third excited state of the oscillator, defined by
 \begin{equation}
     A = y^3 - \frac{3}{2} y
     \label{eq:operator_A}
 \end{equation}
-Si sono anche misurati i correlatori connessi:
+We also measured the connected correlators
 \begin{equation}
     C_O(n) = \langle O(n) O(0) \rangle - |\langle O \rangle|^2
     \label{eq:connected_corr}
 \end{equation}
-per $n=0,1,\dots,\frac{N_t}{2}$ per gli operatori $\langle y \rangle$, 
-$\langle y^2 \rangle$, $\langle y^3 \rangle$, $\langle A \rangle$.
+for $n=0,1,\dots,\frac{N_t}{2}$, for the operators $\langle y \rangle$,
+$\langle y^2 \rangle$, $\langle y^3 \rangle$ and $\langle A \rangle$.
 
-\subsection{Stimatori utilizzati}
-Le stime di $\langle y \rangle$, $\langle y^2 \rangle$, $\langle y^3 \rangle$ e
-$\langle A \rangle$ si ottengono come semplice media delle osservabili corrispondenti
-(che dipendono solo dalla posizione) sui cammini campionati,
+\subsection{Estimators used}
+The estimates of $\langle y \rangle$, $\langle y^2 \rangle$, $\langle y^3 \rangle$
+and $\langle A \rangle$ are obtained as simple averages of the corresponding
+observables (which depend only on the position) over the sampled paths,
 \begin{equation}
 \overline{y} = \frac{1}{N_t} \sum_{i=1}^{N_t} y_i, \quad
 \overline{y^2} = \frac{1}{N_t} \sum_{i=1}^{N_t} y_i^2, \quad
 \overline{y^3} = \frac{1}{N_t} \sum_{i=1}^{N_t} y_i^3, \quad
 \overline{A} = \frac{1}{N_t} \sum_{i=1}^{N_t} \left(y_i^3 - \frac{3}{2} y_i\right)
 \end{equation}
-I valori di aspettazione di $y$, $y^3$ e $A$ sono tutti nulli per simmetria.
-L'energia si calcola come:
+The expectation values of $y$, $y^3$ and $A$ all vanish by symmetry.
+The energy is computed as
 \begin{equation}
     \overline{H} = \left\langle \frac{1}{2 N_t} \sum_{i=0}^{N_t-1} y_i^2 + \frac{1}{2\eta} - \frac{1}{2N_t} \sum_{i=0}^{N_t-1} \frac{\left(y_{i+1} - y_i\right)^2}{\eta^2} \right\rangle
     \label{eq:energy_estimator}
 \end{equation}
-Da confrontare con il suo valore teorico che in unità adimensionali coincide con
-il valore di $\langle y^2 \rangle$ e risulta::
+to be compared with its theoretical value which, in dimensionless units, coincides
+with the value of $\langle y^2 \rangle$ and reads
 \begin{equation}
     \langle H \rangle = \langle y^2 \rangle =\frac{1}{2} \frac{1 + e^{-\beta\hbar\omega}}{1 - e^{-\beta\hbar\omega}}
     \label{eq:theory_energy}
 \end{equation}
-Le stime dei correlatori si ottengono da:
+The estimates of the correlators are obtained from
 \begin{equation}
     \overline{O(n)O(0)} = \frac{1}{N_t} \sum_{i=0}^{N_t-1} O(x_i) O(x_{i+n})
 \end{equation}
 
-\section{Analisi e risultati}
+\section{Analysis and results}
 
-\subsection{Stima incertezze}
-Per stimare le incertezze sulle osservabili primarie si è adottata la procedura
-di blocking. Le incertezze sui correlatori connessi e sui gap energetici
-sono state stimate usando il Jackknife a blocchi,
-ricercando il plateau per ottenere un valore affidabile gestendo
-le autocorrelazioni tra i dati. Riportiamo in figura \ref{fig:blocking_uncertainties}
-e \ref{fig:jackknife_uncertainties}, a scopo esemplificativo,
-l'andamento delle incertezze in funzione dell'ampiezza dei blocchi, in cui
-si può apprezzare la presenza del plateau, sia per il blocking sulle osservabili
-primarie che per il jackknife sui correlatori connessi.
+\subsection{Uncertainty estimation}
+The uncertainties on the primary observables were estimated with the blocking
+procedure. The uncertainties on the connected correlators and on the energy gaps
+were estimated using a blocked jackknife, looking for the plateau in order to obtain
+a reliable value while handling the autocorrelation between the data. As an
+illustration, figures \ref{fig:blocking_uncertainties} and
+\ref{fig:jackknife_uncertainties} show the behaviour of the uncertainties as a
+function of the block size, where the plateau is clearly visible both for the
+blocking on the primary observables and for the jackknife on the connected
+correlators.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{../plots/bhw10_nstep1000000/nt200_therm50000/blocking_observables.png}
-\caption{Andamento delle incertezze su $\langle y \rangle$, $\langle y^2 \rangle$, $\langle y^3 \rangle$, $\langle A \rangle$ e $\langle E \rangle$ in funzione dell'ampiezza dei blocchi per $\beta\hbar\omega=10$ e $N_t=200$.}
+\caption{Behaviour of the uncertainties on $\langle y \rangle$, $\langle y^2 \rangle$, $\langle y^3 \rangle$, $\langle A \rangle$ and $\langle E \rangle$ as a function of the block size, for $\beta\hbar\omega=10$ and $N_t=200$.}
 \label{fig:blocking_uncertainties}
 \end{figure}
-L'incertezza sull'energia sembra saturare in modo peggiore. In realtà l'escursione dei valori è
-relativamente piccola ma, a causa dello zoom sull'asse delle ordinate, appare amplificata.
+The uncertainty on the energy appears to saturate less clearly. In fact the spread
+of the values is relatively small but, because of the zoom on the vertical axis, it
+appears amplified.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{../plots/bhw10_nstep1000000/nt200_therm50000/blocking_jackknife.png}
-\caption{Andamento delle incertezze sui correlatori connessi per $n=1, 25, 50$ (esempio) in funzione dell'ampiezza dei blocchi per $\beta\hbar\omega=10$ e $N_t=200$.}
+\caption{Behaviour of the uncertainties on the connected correlators for $n=1, 25, 50$ (as an example) as a function of the block size, for $\beta\hbar\omega=10$ and $N_t=200$.}
 \label{fig:jackknife_uncertainties}
 \end{figure}
 
-\subsection{Energia in funzione della temperatura}
-Riportiamo in figura \ref{fig:energy_vs_temp} l'andamento dell'energia in funzione della temperatura.
+\subsection{Energy as a function of temperature}
+Figure \ref{fig:energy_vs_temp} shows the behaviour of the energy as a function of
+temperature.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{../results/energy_vs_temp/fits/E_vs_T_eta0.1_20260209_182438.png}
-\caption{Andamento dell'energia in funzione della temperatura per $\eta=0.1$}
+\caption{Behaviour of the energy as a function of temperature for $\eta=0.1$.}
 \label{fig:energy_vs_temp}
 \end{figure}
-Abbiamo eseguito un fit a 2 parametri con modello:
+We performed a two-parameter fit with the model
 \begin{equation}
     a + \frac{b}{e^{\beta\hbar\omega} - 1}
     \label{eq:bose_model}
 \end{equation}
-che corrisponde all'espressione teorica dell'energia (equazione~\ref{eq:theory_energy}),
-con $a$ che dovrebbe fornire l'energia dello stato fondamentale $E_0 = 0.5$ e $b$ che dovrebbe
-essere pari a $\hbar\omega = 1$.
-% Tabella con i risultati del fit
+which corresponds to the theoretical expression of the energy
+(equation~\ref{eq:theory_energy}), with $a$ expected to give the ground-state energy
+$E_0 = 0.5$ and $b$ expected to equal $\hbar\omega = 1$.
+% Table with the fit results
 \setlength{\heavyrulewidth}{\lightrulewidth}
 \begin{table}[ht]
 \centering
-\caption{Risultati del fit.}
+\caption{Fit results.}
 \label{tab:risultati_fit_evst}
 \begin{tabular}{l S[table-format=1.4(3)]}
 \toprule
@@ -288,31 +289,31 @@ $corr(a,b)$     & -0.272 \\
 \end{tabular}
 \end{table}
 
-Bisogna notare che questa procedura non è rigorosa poiché i dati dell'energia utilizzati
-non sono le opportune estrapolazioni al limite termodinamico. Aver fissato il passo $\eta$
-ci espone agli scostamenti di passo finito di ordine $O(\eta^2)$
-e probabilmente a valori troppo bassi di $N_t$ associati ai valori più piccoli di $\beta\hbar\omega$.
-Per un risultato più affidabile si potrebbe adottare l'approccio descritto nella sezione
-successiva, usando diversi valori di $N_t$ per ogni $\beta\hbar\omega$ e effettuando un fit lineare
-in $\eta^2$:
+It should be noted that this procedure is not rigorous, since the energy data used
+are not the appropriate extrapolations to the continuum limit. Having fixed the step
+$\eta$ exposes us to finite-step deviations of order $O(\eta^2)$, and probably to
+values of $N_t$ that are too small for the smallest values of $\beta\hbar\omega$.
+For a more reliable result one could adopt the approach described in the following
+section, using several values of $N_t$ for each $\beta\hbar\omega$ and performing a
+linear fit in $\eta^2$:
 \begin{equation}
     E(\eta^2) = a + b \eta^2
     \label{eq:linear_model}
 \end{equation}
-In questo modo si estrapola il limite al continuo dell'energia
-per ogni valore di $\beta\hbar\omega$ e possiamo eseguire il fit in funzione della
-temperatura usando questi valori, corrispondenti all'intercetta del fit lineare.
-A causa di limitate risorse computazionali e di statistica insufficiente, si è proceduto comunque
-in questo modo, assumendo che $\eta=0.1$ sia sufficientemente piccolo
-da non introdurre scostamenti significativi dal modello al limite del continuo.
-Dal fit si ottiene un valore di $a$ che si discosta di quasi 4 sigma dal valore
-teorico di 0.5, mentre $b$ risulta ben compatibile (tabella~\ref{tab:risultati_fit_evst}).
+In this way one extrapolates the continuum limit of the energy for each value of
+$\beta\hbar\omega$, and the fit as a function of temperature can be performed using
+those values, corresponding to the intercept of the linear fit.
+Because of limited computational resources and insufficient statistics, we proceeded
+as described above anyway, assuming that $\eta=0.1$ is small enough not to introduce
+significant deviations from the continuum-limit model.
+The fit gives a value of $a$ that differs from the theoretical value of 0.5 by almost
+4 sigma, while $b$ is well compatible (table~\ref{tab:risultati_fit_evst}).
 
-\subsection{Effetti di passo finito ed estrapolazione al continuo}
-Qui si effettua l'analisi citata di sopra per un singolo valore di $\beta\hbar\omega$.
-Riportiamo in figura~\ref{fig:combinata} anche l'andamento di $\langle y \rangle$ e $\langle y^2 \rangle$
-per $\beta\hbar\omega = 10$.
-%Grafici con le osservabili primarie
+\subsection{Finite-step effects and continuum extrapolation}
+Here we carry out the analysis mentioned above for a single value of
+$\beta\hbar\omega$. Figure~\ref{fig:combinata} also shows the behaviour of
+$\langle y \rangle$ and $\langle y^2 \rangle$ for $\beta\hbar\omega = 10$.
+%Plots of the primary observables
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
@@ -324,45 +325,45 @@ per $\beta\hbar\omega = 10$.
         \centering
         \includegraphics[width=\textwidth]{../plots/bhw10_nstep1000000/plot_y2_ntherm50000.png}
     \end{subfigure}
-    
-    \caption{Valori di $\langle y \rangle$ e $\langle y^2 \rangle$ per $\beta\hbar\omega = 10$
-    in funzione di $N_t$: $y$ è compatibile con zero, mentre $y^2$ sembra compatibile col valore teorico
-    di $\approx 0.5$ al limite del continuo.}
+
+    \caption{Values of $\langle y \rangle$ and $\langle y^2 \rangle$ for $\beta\hbar\omega = 10$
+    as a function of $N_t$: $y$ is compatible with zero, while $y^2$ appears compatible with the
+    theoretical value of $\approx 0.5$ in the continuum limit.}
     \label{fig:combinata}
 \end{figure}
-Adesso mostriamo il grafico dell'energia (figura~\ref{fig:energy_continuum_fit}). Si è effettuato un fit lineare in $\eta^2$
-con il modello in equazione (\ref{eq:linear_model})
-considerando i valori di $\eta < 0.5$, per testare il limite del continuo e catturare
-gli scostamenti $O(\eta^2)$ per effetti di passo finito (sono visibili anche gli scostamenti
-di ordine superiore per i valori di $\eta$ più grandi, non inclusi nel fit).
+We now show the plot of the energy (figure~\ref{fig:energy_continuum_fit}). We
+performed a linear fit in $\eta^2$ with the model of equation
+(\ref{eq:linear_model}), considering the values with $\eta < 0.5$, in order to test
+the continuum limit and to capture the $O(\eta^2)$ deviations due to finite-step
+effects (higher-order deviations are also visible for the larger values of $\eta$,
+which are not included in the fit).
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{../results/bhw10_nstep1000000/fits/continuum_E_20260210_125528.png}
-\caption{Andamento dell'energia in funzione di $\eta^2$ per $\beta\hbar\omega=10$ e fit lineare per
-i valori di $\eta < 0.5$.}
+\caption{Behaviour of the energy as a function of $\eta^2$ for $\beta\hbar\omega=10$, with a linear fit for the values with $\eta < 0.5$.}
 \label{fig:energy_continuum_fit}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{../results/bhw10_nstep1000000/fits/continuum_E_20260210_125533.png}
-\caption{Stesso fit dell'energia ma mostrato con i residui normalizzati, nel solo range di valori
-di $\eta$ considerati per il fit.}
+\caption{The same energy fit, shown with the normalised residuals, restricted to the range of $\eta$ values considered in the fit.}
 \label{fig:energy_continuum_fit_residuals}
 \end{figure}
-Il valore di energia al limite del continuo è compatibile con il valore teorico di
-$\approx0.5$, come si vede dalla tabella riassuntiva (tabella~\ref{tab:risultati_fit_continuum}).
+The energy value in the continuum limit is compatible with the theoretical value of
+$\approx0.5$, as can be seen from the summary table
+(table~\ref{tab:risultati_fit_continuum}).
 
-% Tabella con i risultati del fit del limite del continuo
+% Table with the continuum-limit fit results
 \setlength{\heavyrulewidth}{\lightrulewidth}
 \begin{table}[ht]
 \centering
-\caption{Risultati del fit lineare a due parametri dell'energia in funzione di $\eta^2$.
-Il valore del $\chi^2$ ridotto è un po' alto, il che potrebbe essere dovuto a un caso
-per statistica insufficiente o alla presenza di scostamenti non trascurabili di ordine superiore
-a $\eta^2$ anche per i valori più grandi di $\eta$ considerati nel fit. Il valore di $a$ è
-compatibile con il valore teorico di 0.5.}
+\caption{Results of the two-parameter linear fit of the energy as a function of $\eta^2$.
+The value of the reduced $\chi^2$ is somewhat high, which could be due either to chance
+with insufficient statistics, or to the presence of non-negligible deviations of order
+higher than $\eta^2$ even for the largest values of $\eta$ included in the fit. The value
+of $a$ is compatible with the theoretical value of 0.5.}
 \label{tab:risultati_fit_continuum}
 \begin{tabular}{l S[table-format=1.4(3)]}
 \toprule
@@ -376,79 +377,85 @@ $corr(a,b)$     & -0.85 \\
 \end{tabular}
 \end{table}
 
-\subsection{Gap energetici}
-Per estrarre i gap energetici si ricorre al gap efficace, nel caso adimensionale definito da:
+\subsection{Energy gaps}
+To extract the energy gaps we resort to the effective gap which, in the
+dimensionless case, is defined by
 \begin{equation}
     \Delta E(n) = \frac{1}{\eta} \log\left[\frac{C(n)}{C(n+1)}\right]
     \label{eq:gap_efficace}
 \end{equation}
-Infatti per grandi valori di $n$ il correlatore connesso va come:
+Indeed, for large values of $n$ the connected correlator behaves as
 \begin{equation}
     C(n) \sim e^{-n \eta \Delta E }
     \label{eq:corr_asymptotic}
 \end{equation}
-Il $\Delta E$ estratto si riferisce al primo livello eccitato $E_{\overline{m}}$
-tale che:
+The extracted $\Delta E$ refers to the first excited level $E_{\overline{m}}$ such
+that
 \begin{equation}
     \bra{0} O \ket{\overline{m}} \neq 0
     \label{eq:selection_rule}
 \end{equation}
-Usando la definizione di sopra (equazione~\ref{eq:gap_efficace}) otterremo una sequenza di stime del gap energetico
-in funzione di $n$, che dovrebbe appiattirsi attorno a un plateau il quale corrisponde al gap.
+Using the definition above (equation~\ref{eq:gap_efficace}) we obtain a sequence of
+estimates of the energy gap as a function of $n$, which should flatten around a
+plateau corresponding to the gap.
 
 \begin{itemize}
-    \item \textbf{Gap $E_1 - E_0$}: Per stimare il primo gap energetico possiamo utilizzare
-    sia il correlatore connesso di $y$ che quello di $y^3$, ma il primo risulta più accurato,
-    in quanto verifica anche:
+    \item \textbf{Gap $E_1 - E_0$}: to estimate the first energy gap we can use
+    either the connected correlator of $y$ or that of $y^3$, but the former is more
+    accurate, since it also satisfies
 \begin{equation}
     \langle 0 | y | n \rangle = \frac{1}{\sqrt{2}} \delta_{n,1}
     \label{eq:y_matrix_element}
 \end{equation}
-mentre $y^3$ ha sovrapposizione non nulla anche con $0$ e $3$, quindi il profilo dei gap
-converge lentamente al plateau, e prima che esso venga raggiunto in modo stabile,
-i dati diventano molto rumorosi (poiché il correlatore raggiunge valori molto piccoli
-e il rapporto diventa instabile, con incertezze enormi).
-    \item \textbf{Gap $E_2 - E_0$}: Per stimare il secondo gap energetico si usa il correlatore
-    connesso di $y^2$, che ha una sovrapposizione non nulla solo con $0$ e $2$ (quindi risulta
-    particolarmente adeguato come operatore interpolante per questo gap).
-    \item \textbf{Gap $E_3 - E_0$}: Per stimare il terzo gap energetico si usa il
-    correlatore connesso di $A$, ma a priori questo è fattibile solo
-    per l'oscillatore armonico dato che ne conosciamo la soluzione analitica. 
-    Infatti $A$ (equazione~\ref{eq:operator_A}) è costruito ad hoc per essere proporzionale al polinomio di Hermite $H_3$,
-    che sappiamo essere l'autofunzione del terzo stato eccitato. Non è possibile invece
-    utilizzare $y^3$ come operatore interpolante per il terzo gap,
-    poiché ha sovrapposizione non nulla anche con $1$.
+whereas $y^3$ has non-vanishing overlap with $0$ and $3$ as well, so that the gap
+profile converges slowly to the plateau, and before it is reached in a stable way
+the data become very noisy (since the correlator reaches very small values and the
+ratio becomes unstable, with enormous uncertainties).
+    \item \textbf{Gap $E_2 - E_0$}: to estimate the second energy gap we use the
+    connected correlator of $y^2$, which has non-vanishing overlap only with $0$ and
+    $2$ (and is therefore particularly well suited as an interpolating operator for
+    this gap).
+    \item \textbf{Gap $E_3 - E_0$}: to estimate the third energy gap we use the
+    connected correlator of $A$, but a priori this is only feasible for the harmonic
+    oscillator, since we know its analytic solution. Indeed $A$
+    (equation~\ref{eq:operator_A}) is built ad hoc to be proportional to the Hermite
+    polynomial $H_3$, which we know to be the eigenfunction of the third excited
+    state. It is not possible, on the other hand, to use $y^3$ as an interpolating
+    operator for the third gap, since it also has non-vanishing overlap with $1$.
 
 \end{itemize}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{../plots/bhw10_nstep1000000/nt200_therm50000/energy_gaps_n50_plot.png}
-\caption{Gap efficaci con chiara manifestazione del plateau sui valori attesi.
-Dati corrispondenti a $\beta\hbar\omega=10$ e $N_t=200$,
-eliminando i valori $n \eta > 2.5$, affetti da troppo rumore e incertezze
-molto grandi. Nella parte finale dei gap relativi a
-$A$ si inizia a vedere una forte instabilità dei dati, che caratterizza anche la coda
-delle altre osservabili nella porzione di dati esclusa dal grafico.}
+\caption{Effective gaps, with a clear plateau at the expected values.
+Data corresponding to $\beta\hbar\omega=10$ and $N_t=200$,
+removing the values with $n \eta > 2.5$, which are affected by too much noise and
+very large uncertainties. In the final part of the gaps relative to
+$A$ a strong instability of the data begins to appear, which also characterises the tail
+of the other observables in the portion of data excluded from the plot.}
 \label{fig:energy_gaps}
 \end{figure}
 
-E' stato effettuato un fit costante 'naive' sui dati del plateau (figura~\ref{fig:energy_gaps}), per estrarre i valori dei gap
-energetici, ma è necessario tenere a mente che i dati sono correlati tra loro,
-quindi è stato eseguito solo a scopo
-illustrativo e non è affidabile per estrarre stime precise con le opportune incertezze.
-I risultati ottenuti sono riportati nella tabella~\ref{tab:gap_energetici}:
+A naive constant fit was performed on the plateau data (figure~\ref{fig:energy_gaps})
+in order to extract the values of the energy gaps, but it should be kept in mind
+that the data are correlated with one another; the fit was therefore carried out for
+illustrative purposes only and is not reliable for extracting precise estimates with
+the appropriate uncertainties. The results obtained are reported in
+table~\ref{tab:gap_energetici}:
 
 \setlength{\heavyrulewidth}{\lightrulewidth}
 \begin{table}[ht]
 \centering
-\caption{Fit costante sui dati del plateau, effettuato fino a $n \eta = 2.5$
-(risultati ottenuti senza aver tenuto in conto delle correlazioni tra i dati).
+\caption{Constant fit on the plateau data, performed up to $n \eta = 2.5$
+(results obtained without taking into account the correlations between the data).
 }
 \label{tab:gap_energetici}
 \begin{tabular}{l S[table-format=1.4(3)] r}
 \toprule
-Gap Energetico & Stima & Valore Teorico \\
+% The middle column is a siunitx S column, so its textual heading must be
+% braced, otherwise siunitx tries to parse it as a number.
+Energy gap & {Estimate} & Theoretical value \\
 \midrule
 $E_1 - E_0$ & 0.9999(3) & 1.000 \\
 $E_2 - E_0$ & 2.0005(8) & 2.000 \\
@@ -457,17 +464,16 @@ $E_3 - E_0$ & 2.999(2) & 3.000 \\
 \end{tabular}
 \end{table}
 
-\subsection{Funzione d'onda dello stato fondamentale}
-Per ricostruire la funzione d'onda dello stato fondamentale,
-si è costruito un istogramma dei valori di $y$ campionati per tre combinazioni
-di $\beta\hbar\omega$ e $N_t$, confrontandolo con la distribuzione di probabilità
-teorica data da:
+\subsection{Ground-state wave function}
+To reconstruct the ground-state wave function we built a histogram of the sampled
+values of $y$ for three combinations of $\beta\hbar\omega$ and $N_t$, comparing it
+with the theoretical probability distribution
 \begin{equation}
     P(y) = |\psi_0(y)|^2 = \frac{1}{\sqrt[4]{\pi}} e^{-y^2}
     \label{eq:ground_state_wavefunction}
-\end{equation}Per questa analisi è stata effettuata una simulazione separata,
-utilizzando $3.5 \times 10^4$ campioni di configurazione per ciascun istogramma
-scartando i primi $5 \times 10^3$ campioni come fase di termalizzazione.\begin{figure}[H]
+\end{equation}For this analysis a separate simulation was performed,
+using $3.5 \times 10^4$ configuration samples for each histogram
+and discarding the first $5 \times 10^3$ samples as a thermalisation phase.\begin{figure}[H]
 \centering
 
 \begin{subfigure}[c]{0.6\textwidth}
@@ -489,28 +495,30 @@ scartando i primi $5 \times 10^3$ campioni come fase di termalizzazione.\begin{f
 
 \vspace{0.5cm}
 
-\caption{Istogrammi della ricostruzione della funzione d'onda dello stato fondamentale 
-per tre scelte di parametri, confrontati con la distribuzione di probabilità teorica.}
+\caption{Histograms of the reconstruction of the ground-state wave function
+for three choices of parameters, compared with the theoretical probability distribution.}
 \label{fig:ground_state_wavefunction}
 \end{figure}
-L'unico caso che
-ricostruisce adeguatamente la distribuzione dello stato fondamentale è quello con
-$\beta\hbar\omega=20$ e $N_t=400$ (figura in alto, con $\eta = 0.05$), che è abbastanza vicino al limite del continuo
-e ha una temperatura sufficientemente bassa. Il caso con $\beta\hbar\omega=20$ e $N_t=10$
-(figura centrale, con $\eta=2$) non riproduce adeguatamente la distribuzione poiché pur avendo una temperatura
-bassa, il passo temporale è troppo grande. Il caso con $\beta\hbar\omega=1$ e $N_t=20$
-(figura in basso, con $\eta=0.05$) pur avendo un passo temporale ridotto, non cattura il solo stato fondamentale
-poiché la temperatura è troppo alta per isolarlo.
+The only case that adequately reconstructs the ground-state distribution is the one
+with $\beta\hbar\omega=20$ and $N_t=400$ (top figure, with $\eta = 0.05$), which is
+close enough to the continuum limit and at a sufficiently low temperature. The case
+with $\beta\hbar\omega=20$ and $N_t=10$ (middle figure, with $\eta=2$) does not
+reproduce the distribution adequately since, although the temperature is low, the
+time step is too large. The case with $\beta\hbar\omega=1$ and $N_t=20$ (bottom
+figure, with $\eta=0.05$), despite the small time step, does not capture the ground
+state alone, since the temperature is too high to isolate it.
 
 
-\section{Conclusioni}
+\section{Conclusions}
 
-Con i risultati ottenuti, nota la soluzione analitica dell'oscillatore e la sua termodinamica,
-possiamo ragionevolmente concludere che la catena di Markov qui implementata, campioni correttamente
-la distribuzione di probabilità dei cammini, dato che le stime delle osservabili primarie e dei
-gap energetici sono compatibili con i valori teorici attesi e che nelle opportune condizioni
-siamo in grado di ricostruire adeguatamente il modulo quadro della funzione d'onda dello stato fondamentale.
-Aumentando la statistica si potrebbero ottenere risultati più precisi per estrarre
-i valori delle osservabili al limite del continuo effettuando anche analisi più accurate.
+Given the results obtained, and knowing the analytic solution of the oscillator and
+its thermodynamics, we can reasonably conclude that the Markov chain implemented
+here samples the probability distribution of the paths correctly, since the
+estimates of the primary observables and of the energy gaps are compatible with the
+expected theoretical values, and since under the appropriate conditions we are able
+to adequately reconstruct the squared modulus of the ground-state wave function.
+By increasing the statistics one could obtain more precise results for extracting
+the values of the observables in the continuum limit, also allowing more accurate
+analyses.
 
 \end{document}
