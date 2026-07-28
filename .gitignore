@@ -1,23 +1,32 @@
-
+# ---- Build artifacts ----
 *.exe
-
+*.o
 *.out
+*.mod
 
+# ---- LaTeX auxiliary files (the PDF itself IS tracked) ----
 *.aux
-
 *.log
-
 *.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
 
-*.dat
-
-.venv/
-
-__pycache__/
-
-plots/
-
-utils/notes.txt
-
+# ---- Raw MCMC output: too large for git, regenerate with `make` ----
+data/
+preliminary_data/
+ground_state_paths.txt
 randomseed
 
+# ---- Superseded figures from earlier versions of the analysis ----
+plots/old_plots/
+
+# ---- Python ----
+.venv/
+__pycache__/
+*.pyc
+
+# NOTE: results/ and plots/ are intentionally tracked. They hold the
+# post-processed analysis (small .dat tables) and the figures used by
+# the report, so the document can be rebuilt without re-running the
+# multi-hour simulations.

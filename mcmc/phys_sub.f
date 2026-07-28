@@ -133,27 +133,6 @@ c     Set correlation parameter
       end subroutine set_corr_param
 
 
-c     Connected correlator: <O(0)O(nc)> - <O>^2
-      subroutine connected_corr(corr_values, obs_values, n, result)
-      implicit none
-      integer n, i
-      real*8 corr_values(n), obs_values(n), result
-      real*8 mean_corr, mean_obs
-
-      mean_corr = 0.d0
-      mean_obs = 0.d0
-      do i = 1, n
-        mean_corr = mean_corr + corr_values(i)
-        mean_obs = mean_obs + obs_values(i)
-      end do
-      mean_corr = mean_corr / dble(n)
-      mean_obs = mean_obs / dble(n)
-
-      result = mean_corr - mean_obs**2
-
-      end subroutine connected_corr
-
-
 c     Compute the energy over the path
       subroutine path_ene(y, nt, eta, energy)
 

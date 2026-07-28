@@ -4,8 +4,6 @@
       parameter (nt_max=200)  ! maximum number of time slices
       parameter (ncorr_max=100) ! maximum nt/2 = 200/2 = 100
       parameter (max_nt_list=20)
-      integer ncorr
-      common /corr_params/ ncorr
       real*8 bhw
       integer nsteps
       integer n_nt
@@ -13,15 +11,14 @@
       integer energy_only
       namelist /params/ bhw, nsteps, n_nt, nt_vals, energy_only
       integer nt, ncorr_points
-      integer istart
-      integer j, idx, i, n, nprog
+      integer j, i, n, nprog
       real*8 y(nt_max)
       real*8 ym, y2m, y3m, Am, em
       real*8 ycm(ncorr_max), y2cm(ncorr_max)
       real*8 y3cm(ncorr_max), Acm(ncorr_max)
       external y1, y2, y3, A
       external y1_corr, y2_corr, y3_corr, A_corr
-      real*8 gamma, alpha, mu, sigma
+      real*8 alpha, sigma
       real*8 eta
       character*200 filename
       character*200 datadir
@@ -56,7 +53,6 @@ c     Build output directory
       write(*,*) 'n_nt =', n_nt
       write(*,*) 'Output: ', trim(datadir)
 
-      istart = 0  ! cold start
       nprog = max(nsteps / 10, 1)
 
 c     Initialize ran2 RNG
@@ -157,24 +153,3 @@ c     Initialize path to zero
       end do
       
       end subroutine cold_start
-
-
-c     ===========================
-      subroutine hot_start(y, nt)
-c     ===========================
-c     Initialize path with random values between -1 and 1
-
-      implicit none
-      integer nt
-      real*8 y(nt), ran2
-      integer i
-
-      do i = 1, nt
-        y(i) = 2.d0 * ran2() - 1.d0
-      end do
-        
-      end subroutine hot_start
-
-
-
-

@@ -1,0 +1,4 @@
+# timestamp  type  operator  n_min  n_max  value  error  chi2red  extra
+2026-02-09T11:39:54  energy_gap  y2c  0  50  2.00053458e+00  7.65315090e-04  0.5162  const_fit
+2026-02-09T11:40:22  energy_gap  y2c  0  100  2.00048771e+00  7.65220342e-04  0.6463  const_fit
+2026-02-09T13:06:51  energy_gap  Ac  0  30  2.99861371e+00  2.15141617e-03  0.5449  const_fit

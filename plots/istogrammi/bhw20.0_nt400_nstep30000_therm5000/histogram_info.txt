@@ -1,0 +1,15 @@
+=== Istogramma stato fondamentale ===
+
+Parametri simulazione:
+  βℏω = 20.0
+  N_t = 400
+  Configurazioni = 30000
+  Termalizzazione = 5000
+  Bins = 100
+
+Statistiche:
+  Campioni totali = 12000000
+  Media (μ) = 0.001929
+  Varianza (σ²) = 0.502306
+  Dev. standard (σ) = 0.708735
+  Cumulante di Binder (U) = 3.000257

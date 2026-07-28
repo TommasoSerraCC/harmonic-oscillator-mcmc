@@ -130,16 +130,20 @@ c     Generates a Gaussian random number using the Box-Muller algorithm
 c     =========================================================
       subroutine euclidean_action(s, y, nt, eta, alpha)
 c     =========================================================
-c     Computes the euclidean action for a given path y
-      implicit real*8 (a-h,o-z)
+c     Computes the discrete Euclidean action of a path y.
+c     Used by the test suite to verify that the microcanonical
+c     (over-relaxation) sweep leaves the action invariant.
+
+      implicit none
+      integer nt, i
+      real*8 s, y(nt), eta, alpha
 
       s = 0.d0
       do i = 1, nt-1
-c       skip the last term for periodic boundary conditions
-        s = s + y(i)**2 * alpha - (1.d0/eta)*y(i) * y(i+1)
+        s = s + y(i)**2 * alpha - (1.d0/eta) * y(i) * y(i+1)
       end do
-      s = s + y(nt)**2 * alpha - (1.d0/eta)*y(nt) * y(1)  ! periodic BC
+c     last term closes the periodic boundary condition
+      s = s + y(nt)**2 * alpha - (1.d0/eta) * y(nt) * y(1)
 
       end subroutine euclidean_action
-
 
