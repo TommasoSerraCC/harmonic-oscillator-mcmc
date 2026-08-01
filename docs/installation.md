@@ -28,11 +28,13 @@ pip install -r requirements.txt
 make
 ```
 
-`requirements.txt` covers running the code. For the test suite and this
-documentation install the development set instead:
+`requirements.txt` covers running the code. The test suite additionally needs
+`pytest`, and building this documentation needs the toolchain listed in
+`docs/requirements.txt`:
 
 ```sh
-pip install -r requirements-dev.txt
+pip install pytest
+pip install -r docs/requirements.txt
 ```
 
 ## Build targets
