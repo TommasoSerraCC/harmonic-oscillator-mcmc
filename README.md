@@ -6,103 +6,50 @@
 Markov Chain Monte Carlo simulation of the one-dimensional quantum harmonic
 oscillator in the Euclidean path integral formalism.
 
-After a Wick rotation, discretising imaginary time into `N_t` slices turns the
-quantum problem into a chain of coupled variables that can be sampled like an
-ordinary classical system. From the sampled paths the code measures thermal
-averages, energy gaps and the ground-state position distribution.
+## Physics
 
-## How it works
+After a Wick rotation to imaginary time, the quantum partition function becomes
+a sum over periodic paths weighted by `e^{−S}`, with `S` the Euclidean action.
+Discretising imaginary time into `N_t` slices of spacing `η = aω` turns the
+oscillator into a one-dimensional chain of variables coupled to their nearest
+neighbours — an ordinary classical statistical system that can be sampled by
+Monte Carlo. Two limits connect the lattice back to the physics: `η → 0`
+removes the discretisation error, and `βħω → ∞` projects onto the ground
+state.
 
-Three layers:
+## Simulation
 
-- **Fortran core** — generates the chain with a heat-bath plus over-relaxation
-  update, both with acceptance 1, and measures observables and correlators along
-  each path.
-- **Python analysis** — blocking and jackknife error estimates, autocorrelation
-  times, connected correlators and effective energy gaps.
-- **Tkinter GUI** — drives both and provides interactive plotting and fitting.
+The sampling core is written in Fortran. Because the discretised action is
+Gaussian, the conditional distribution of each site given its neighbours is
+known in closed form, so the chain is updated with a **heat-bath** sweep: every
+site is redrawn exactly from its conditional Gaussian (Box–Muller), with
+acceptance 1 and no step-size tuning. Each heat-bath sweep is followed by five
+**over-relaxation** sweeps — a deterministic reflection of each site about its
+conditional mean that leaves the action invariant — which decorrelate
+successive paths at negligible cost.
 
-## Requirements
+## Analysis
 
-`gfortran`, GNU `make`, Python 3.9 or newer.
+The Python layer estimates errors on the correlated Monte Carlo series by
+**blocking**, scanning the block size until the estimated variance reaches a
+plateau, and by **blocked jackknife** for nonlinear quantities such as
+connected correlators and effective energy gaps. Autocorrelation functions and
+integrated autocorrelation times are computed for every observable, and all
+fits are weighted least squares with `χ²/ndf` and normalised residuals as
+quality checks.
 
-```sh
-pip install -r requirements.txt
-```
+From the sampled ensemble the code extracts:
 
-The GUI needs Tkinter, which ships with CPython on Windows and macOS; on Debian
-or Ubuntu install `python3-tk`. The analysis layer does not need it.
-
-## Build
-
-```sh
-make            # build the simulation executable
-make test       # Fortran unit tests
-make pytest     # Python test suite
-make docs       # build the documentation
-make ui         # launch the GUI
-make help       # list all targets
-```
-
-## Usage
-
-The GUI is the easiest way in:
-
-```sh
-make ui
-```
-
-It runs the simulation, analyses the output, and lets you plot and fit the
-results interactively, saving each fit alongside its parameters.
-
-Each stage also works on its own. The simulation reads its parameters as a
-Fortran namelist on standard input:
-
-```sh
-echo "&params bhw=10, nsteps=1000000, n_nt=1, nt_vals(1)=100, energy_only=0 /" | ./main
-```
-
-`bhw` is the inverse temperature in units of `ħω`, `nsteps` the number of
-measurements and `nt_vals` the lattice sizes to simulate. Raw chains are written
-to `data/`; the analysis reads them and writes result tables to `results/`:
-
-```sh
-python python_scripts/analyze_and_save.py --bhw 10 --nt 100 --skip 50000
-```
-
-The estimators are importable on their own if you only need the numerics:
-
-```python
-from analysis import statistics as st
-
-sigma = st.blocking_sigma(series, block_size=1000)
-```
-
-## Layout
-
-```
-main.f              simulation driver
-mcmc/               algorithm, observables, random number generator
-analysis/           blocking, jackknife, autocorrelation, analysis pipeline
-python_scripts/     command line entry points
-ui/                 Tkinter interface
-tests/              Python test suite
-test/               Fortran unit tests
-docs/               documentation sources
-```
-
-## Tests
-
-```sh
-make test      # Fortran: RNG, action invariance under over-relaxation, equilibrium
-make pytest    # Python: estimators checked against analytically known answers
-```
-
-Both run in CI on every push.
-
-## Documentation
-
-<https://tommasoserracc.github.io/harmonic-oscillator-mcmc/>
+- the thermal moments `⟨y⟩`, `⟨y²⟩`, `⟨y³⟩`, with the odd ones serving as a
+  symmetry check;
+- the energy via the lattice virial estimator, whose temperature dependence
+  reproduces `E(T) = 1/2 + 1/(e^{βħω} − 1)` and whose continuum extrapolation
+  in `η²` recovers the exact ground-state energy `ħω/2`;
+- the low-lying spectrum: effective gaps
+  `ΔE(n) = (1/η) · log[C(n)/C(n+1)]` from the connected correlators of `y`,
+  `y²` and `y³` show clean plateaux at `ħω`, `2ħω` and `3ħω`;
+- the ground-state probability density `|ψ₀(y)|²`, reconstructed from the
+  histogram of sampled positions and matching the exact Gaussian.
 
 ## License
 
